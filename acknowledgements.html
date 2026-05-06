@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acknowledgements — Xtend</title>
+<meta name="description" content="Open-source projects and licenses used by Xtend.">
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Acknowledgements — Xtend" />
+<meta property="og:description" content="Open-source projects Xtend builds on." />
+<meta property="og:url" content="https://xtend.app/acknowledgements.html" />
+<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Acknowledgements — Xtend" />
+<meta name="twitter:description" content="Open-source projects Xtend builds on." />
+<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+
+<link rel="icon" type="image/svg+xml" href="xtend-icon.svg">
+<link rel="apple-touch-icon" href="xtend-og.png">
+<style>
+  :root {
+    --ink: #0e0e10;
+    --ink-mute: #555a64;
+    --bg: #fafaf7;
+    --bg-elev: #f0efeb;
+    --border: rgba(0,0,0,0.08);
+    --accent: #ff5d2b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --ink: #ececef;
+      --ink-mute: #9a9ea8;
+      --bg: #0d0d10;
+      --bg-elev: #18181c;
+      --border: rgba(255,255,255,0.08);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.65; -webkit-font-smoothing: antialiased; }
+  .container { max-width: 760px; margin: 0 auto; padding: 64px 32px; }
+  nav { padding: 18px 32px; border-bottom: 1px solid var(--border); }
+  .nav-inner { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; gap: 10px; }
+  .nav-inner a { color: var(--ink); text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-style: italic; }
+  .nav-inner img { width: 28px; height: 28px; border-radius: 7px; box-shadow: 0 2px 6px rgba(0,0,0,0.18); }
+  .logo-x { font-size: 1.35em; font-weight: 700; font-style: normal; letter-spacing: -0.04em; margin-right: -0.12em; }
+  .label { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+  h1 { font-family: 'Fraunces', Georgia, serif; font-size: 44px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 16px; line-height: 1.1; }
+  h1 em { font-style: italic; color: var(--accent); }
+  .lede { font-size: 18px; color: var(--ink-mute); margin-bottom: 40px; }
+  .credit { padding: 18px 0; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: baseline; }
+  .credit:last-of-type { border-bottom: 1px solid var(--border); }
+  .credit-name { font-size: 16px; font-weight: 600; color: var(--ink); }
+  .credit-license { font-size: 12px; color: var(--ink-mute); font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  .credit-desc { grid-column: 1 / -1; font-size: 14px; color: var(--ink-mute); }
+  .credit a { color: var(--ink); }
+  .back { display: inline-block; margin-top: 32px; font-size: 14px; color: var(--ink-mute); text-decoration: none; }
+  .site-footer { border-top: 1px solid var(--border); padding: 28px 32px; margin-top: 64px; font-size: 13px; color: var(--ink-mute); }
+  .site-footer-inner { max-width: 1180px; margin: 0 auto; display: flex; gap: 16px; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+  .site-footer-links a { color: var(--ink-mute); text-decoration: none; margin-left: 18px; }
+  .site-footer-links a:first-child { margin-left: 0; }
+  .site-footer-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="xtend-landing.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
+  </div>
+</nav>
+
+<div class="container">
+  <span class="label">Acknowledgements</span>
+  <h1>Built on the <em>shoulders</em> of giants.</h1>
+  <p class="lede">Xtend uses the following open-source projects. Thank you to their authors and contributors.</p>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/migueldeicaza/SwiftTerm" target="_blank" rel="noopener">SwiftTerm</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Terminal emulator by Miguel de Icaza, used for the Mac-side PTY relay.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/apple/swift-nio" target="_blank" rel="noopener">SwiftNIO</a></div>
+    <div class="credit-license">Apache 2.0</div>
+    <div class="credit-desc">Cross-platform asynchronous event-driven networking framework by Apple.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/apple/swift-nio-ssh" target="_blank" rel="noopener">SwiftNIO SSH</a></div>
+    <div class="credit-license">Apache 2.0</div>
+    <div class="credit-desc">SSH client implementation built on SwiftNIO; used for the optional remote-shell mode.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://xtermjs.org" target="_blank" rel="noopener">xterm.js</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Web-based terminal emulator embedded in the iOS terminal view.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://fonts.google.com/specimen/Fraunces" target="_blank" rel="noopener">Fraunces</a> &amp; <a href="https://fonts.google.com/specimen/JetBrains+Mono" target="_blank" rel="noopener">JetBrains Mono</a></div>
+    <div class="credit-license">SIL Open Font License 1.1</div>
+    <div class="credit-desc">Display and monospace fonts used on this website.</div>
+  </div>
+
+  <p style="margin-top:32px;font-size:13px;color:var(--ink-mute)">Trademarks: Xcode, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. Xtend is not affiliated with Apple Inc.</p>
+
+  <a href="xtend-landing.html" class="back">← Back to Xtend</a>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span>© 2026 Xtend · Made in Israel</span>
+    <div class="site-footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="acknowledgements.html">Acknowledgements</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

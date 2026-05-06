@@ -1,0 +1,1438 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Xtend — extend your simulator</title>
+<meta name="description" content="A native macOS companion for the iOS Simulator. Mirror, control, and extend your debugging workflow." />
+
+<!-- Open Graph / Social previews -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Xtend — extend your simulator" />
+<meta property="og:description" content="Mirror, control, and stream your iOS Simulator to your iPhone. iOS 18.2+ · macOS 15.2+." />
+<meta property="og:url" content="https://xtend.app/" />
+<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:image:width" content="1024" />
+<meta property="og:image:height" content="1024" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Xtend — extend your simulator" />
+<meta name="twitter:description" content="Mirror, control, and stream your iOS Simulator to your iPhone. iOS 18.2+ · macOS 15.2+." />
+<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+
+<link rel="icon" type="image/svg+xml" href="xtend-icon.svg" />
+<link rel="apple-touch-icon" href="xtend-og.png" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root,
+  [data-theme="dark"] {
+    color-scheme: dark;
+    --bg: #000000;
+    --bg-soft: #0c0c0d;
+    --bg-elev: #1c1c1e;
+    --border: #2a2a2c;
+    --border-soft: #1a1a1c;
+    --ink: #ffffff;
+    --ink-soft: #ebebf5b3;
+    --ink-mute: #ebebf580;
+
+    /* the three Xtend accents — Build · Session · Settings */
+    --orange: #ff9500;
+    --magenta: #c44ce0;
+    --teal: #00c9a7;
+    --green: #34c759;
+
+    --orange-soft: rgba(255, 149, 0, 0.12);
+    --magenta-soft: rgba(196, 76, 224, 0.12);
+    --teal-soft: rgba(0, 201, 167, 0.12);
+
+    --accent: var(--magenta);
+    --accent-soft: var(--magenta-soft);
+    --grid: rgba(255, 255, 255, 0.07);
+
+    --shadow-mock: 0 40px 80px -20px rgba(0, 0, 0, 0.6), 0 20px 40px -10px rgba(0, 0, 0, 0.4);
+    --nav-bg: rgba(0, 0, 0, 0.72);
+    --btn-primary-bg: var(--ink);
+    --btn-primary-ink: var(--bg);
+    --btn-primary-shadow: rgba(255, 255, 255, 0.18);
+  }
+
+  [data-theme="light"] {
+    color-scheme: light;
+    --bg: #ffffff;
+    --bg-soft: #f5f5f3;
+    --bg-elev: #ffffff;
+    --border: #d8d6cf;
+    --border-soft: #e6e4dd;
+    --ink: #000000;
+    --ink-soft: #3a3833;
+    --ink-mute: #6b6960;
+
+    --orange: #b85c00;
+    --magenta: #8a1ea8;
+    --teal: #006e5c;
+    --green: #1a8a40;
+
+    --orange-soft: rgba(184, 92, 0, 0.10);
+    --magenta-soft: rgba(138, 30, 168, 0.10);
+    --teal-soft: rgba(0, 110, 92, 0.10);
+
+    --accent: var(--magenta);
+    --accent-soft: var(--magenta-soft);
+    --grid: rgba(0, 0, 0, 0.08);
+
+    --shadow-mock: 0 40px 80px -20px rgba(0, 0, 0, 0.18), 0 20px 40px -10px rgba(0, 0, 0, 0.10);
+    --nav-bg: rgba(255, 255, 255, 0.80);
+    --btn-primary-bg: #000000;
+    --btn-primary-ink: #ffffff;
+    --btn-primary-shadow: rgba(0, 0, 0, 0.20);
+
+    background: #ffffff !important;
+  }
+  [data-theme="light"] body {
+    background: #ffffff !important;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
+    background: var(--bg);
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    width: 100%;
+    min-height: 100vh;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 32px;
+    position: relative;
+    z-index: 1;
+  }
+  @media (max-width: 720px) {
+    .container { padding: 0 20px; }
+  }
+
+  /* ===== nav ===== */
+  nav {
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    background: var(--nav-bg);
+    border-bottom: 1px solid var(--border-soft);
+    z-index: 100;
+  }
+  .nav-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 32px;
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+  .logo {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+    flex-shrink: 0;
+  }
+  .logo-x {
+    font-size: 1.35em;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: -0.04em;
+    margin-right: -0.12em;
+  }
+  .logo::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2.4s ease-in-out infinite;
+    margin-left: 2px;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    align-items: center;
+    font-size: 13px;
+  }
+  .nav-links a {
+    color: var(--ink-soft);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--ink); }
+  .nav-cta {
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--ink) !important;
+    background: var(--bg-elev);
+    transition: all 0.2s;
+  }
+  .nav-cta:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .theme-seg {
+    display: inline-flex;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+  }
+  .theme-seg button {
+    width: 28px; height: 26px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: var(--ink-mute);
+    cursor: pointer;
+    transition: all 0.15s;
+    padding: 0;
+  }
+  .theme-seg button:hover { color: var(--ink-soft); }
+  .theme-seg button[aria-pressed="true"] {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  @media (max-width: 720px) {
+    .nav-links a:not(.nav-cta) { display: none; }
+  }
+
+  /* ===== hero ===== */
+  .hero {
+    padding: 100px 0 80px;
+    position: relative;
+  }
+  .hero-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 880px) {
+    .hero-layout {
+      grid-template-columns: 1fr;
+    }
+  }
+  .hero-meta {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 36px;
+    font-size: 12px;
+    color: var(--ink-mute);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.1s ease-out forwards;
+  }
+  .hero-meta .dot {
+    width: 6px; height: 6px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 10px var(--green);
+  }
+  .hero-meta .v {
+    padding: 3px 8px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--ink-soft);
+    letter-spacing: 0.02em;
+    text-transform: none;
+  }
+  .hero-meta .sep { color: var(--ink-mute); }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(48px, 8vw, 100px);
+    line-height: 0.96;
+    letter-spacing: -0.04em;
+    margin-bottom: 32px;
+    max-width: 920px;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.2s ease-out forwards;
+  }
+  h1 em {
+    font-style: italic;
+    font-weight: 400;
+  }
+  h1 .v-build { color: var(--orange); }
+  h1 .v-run { color: var(--magenta); }
+  h1 .v-stream { color: var(--teal); }
+
+  .hero-sub {
+    font-size: 16px;
+    color: var(--ink-soft);
+    max-width: 560px;
+    margin-bottom: 48px;
+    line-height: 1.75;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.35s ease-out forwards;
+  }
+  .hero-sub code {
+    background: var(--bg-elev);
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 1px solid var(--border-soft);
+    color: var(--ink);
+    font-size: 13px;
+  }
+
+  .cta-row {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.5s ease-out forwards;
+  }
+  .sys-req {
+    margin-top: 18px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-mute);
+    display: inline-flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    align-items: center;
+    opacity: 0;
+    animation: fadeUp 0.9s 0.7s ease-out forwards;
+  }
+  .sys-req .sep {
+    opacity: 0.45;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 22px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-ink);
+  }
+  .btn-primary:hover {
+    background: var(--btn-primary-bg);
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px var(--btn-primary-shadow);
+    opacity: 0.92;
+  }
+  .btn-ghost {
+    color: var(--ink-soft);
+    border-color: var(--border);
+    background: var(--bg-elev);
+  }
+  .btn-ghost:hover {
+    color: var(--ink);
+    border-color: var(--ink-mute);
+  }
+  .btn .arrow {
+    transition: transform 0.2s;
+  }
+  .btn:hover .arrow {
+    transform: translateX(3px);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== hero banner (phones behind text with gradient overlay) ===== */
+  .hero-banner {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    align-items: flex-start;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s ease-out forwards;
+  }
+  .hero-banner-phone {
+    width: 185px;
+    border-radius: 24px;
+    display: block;
+    flex-shrink: 0;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.08),
+      0 0 20px rgba(255, 255, 255, 0.06),
+      0 0 50px rgba(255, 255, 255, 0.04),
+      0 12px 32px rgba(0, 0, 0, 0.2);
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+  .hero-banner-phone:hover {
+    transform: translateY(-12px) scale(1.03);
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 0 30px rgba(255, 255, 255, 0.1),
+      0 0 60px rgba(255, 255, 255, 0.06),
+      0 20px 48px rgba(0, 0, 0, 0.3);
+  }
+  [data-theme="light"] .hero-banner-phone:hover {
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.05),
+      0 16px 36px rgba(0, 0, 0, 0.1),
+      0 32px 56px rgba(0, 0, 0, 0.12);
+  }
+  .hero-banner-phone:nth-child(1) { margin-top: 30px; }
+  .hero-banner-phone:nth-child(2) { margin-top: 0; }
+  .hero-banner-phone:nth-child(3) { margin-top: 50px; }
+  [data-theme="light"] .hero-banner-phone {
+    box-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.03),
+      0 8px 20px rgba(0, 0, 0, 0.06),
+      0 20px 40px rgba(0, 0, 0, 0.08);
+  }
+  @media (max-width: 880px) {
+    .hero-banner {
+      justify-content: center;
+      margin-top: 48px;
+    }
+    .hero-banner-phone { width: 140px; border-radius: 22px; }
+  }
+  @media (max-width: 600px) {
+    .hero-banner-phone { width: 110px; border-radius: 18px; }
+    .hero-banner { gap: 8px; }
+    .hero-banner-phone:nth-child(3) { display: none; }
+  }
+
+  /* ===== feature rows (text + screenshot) ===== */
+  .feat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 64px;
+    align-items: center;
+    padding: 48px 52px;
+    margin-bottom: 32px;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+  }
+  .feat-row.reverse { direction: rtl; }
+  .feat-row.reverse > * { direction: ltr; }
+  @media (max-width: 880px) {
+    .feat-row {
+      grid-template-columns: 1fr;
+      gap: 40px;
+      padding: 36px 28px;
+      border-radius: 20px;
+    }
+    .feat-row.reverse { direction: ltr; }
+  }
+
+  .feat-row-text {}
+  .feat-row-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .feat-row-num.orange { color: var(--orange); }
+  .feat-row-num.magenta { color: var(--magenta); }
+  .feat-row-num.teal { color: var(--teal); }
+  .feat-row-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: clamp(28px, 3.5vw, 38px);
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 18px;
+  }
+  .feat-row-desc {
+    color: var(--ink-soft);
+    font-size: 14px;
+    line-height: 1.75;
+    max-width: 460px;
+  }
+  .feat-row-desc code {
+    background: var(--bg-elev);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border-soft);
+    font-size: 12px;
+    color: var(--ink);
+  }
+  .feat-row-tag {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .feat-row-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+  }
+  .feat-row-phone {
+    width: 260px;
+    border-radius: 32px;
+    display: block;
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.08),
+      0 20px 48px rgba(0, 0, 0, 0.25),
+      0 48px 100px -10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  .feat-row-phone:hover {
+    transform: translateY(-8px);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.1),
+      0 32px 64px rgba(0, 0, 0, 0.3),
+      0 64px 120px -10px rgba(0, 0, 0, 0.45);
+  }
+  .feat-row-visual::before {
+    content: '';
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.15;
+    z-index: -1;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .feat-row-visual.glow-orange::before { background: var(--orange); }
+  .feat-row-visual.glow-magenta::before { background: var(--magenta); }
+  .feat-row-visual.glow-teal::before { background: var(--teal); }
+  [data-theme="light"] .feat-row-visual::before { opacity: 0.08; }
+
+  .feat-row-pair {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .feat-row-pair .feat-row-phone {
+    width: 200px;
+  }
+  .feat-row-pair .feat-row-phone:last-child {
+    margin-top: 40px;
+  }
+  @media (max-width: 880px) {
+    .feat-row-phone { width: 220px; }
+    .feat-row-pair .feat-row-phone { width: 160px; }
+    .feat-row-visual { justify-content: center; }
+  }
+
+  .feat-row-mac {
+    width: 100%;
+    max-width: 480px;
+    border-radius: 10px;
+    display: block;
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.08),
+      0 20px 48px rgba(0, 0, 0, 0.25),
+      0 48px 100px -10px rgba(0, 0, 0, 0.4);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  }
+  .feat-row-mac:hover {
+    transform: translateY(-8px);
+    box-shadow:
+      0 8px 16px rgba(0, 0, 0, 0.1),
+      0 32px 64px rgba(0, 0, 0, 0.3),
+      0 64px 120px -10px rgba(0, 0, 0, 0.45);
+  }
+
+  [data-theme="light"] .feat-row-phone,
+  [data-theme="light"] .feat-row-mac {
+    box-shadow:
+      0 4px 8px rgba(0, 0, 0, 0.05),
+      0 16px 40px rgba(0, 0, 0, 0.1),
+      0 32px 80px -10px rgba(0, 0, 0, 0.15);
+  }
+
+  /* ===== feature grid cards (compact, image top + text below) ===== */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: 24px;
+    margin-top: 32px;
+  }
+  .feat-grid.flip {
+    grid-template-columns: 1fr 1fr;
+    margin-top: 24px;
+  }
+  @media (max-width: 720px) {
+    .feat-grid, .feat-grid.flip { grid-template-columns: 1fr; }
+  }
+  .feat-card {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    overflow: hidden;
+    transition: box-shadow 0.3s;
+  }
+  .feat-card:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+  .feat-card-img {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    padding: 28px 28px 0;
+    overflow: hidden;
+  }
+  .feat-card-img::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 40%;
+    background: linear-gradient(to top, var(--bg-elev), transparent);
+    pointer-events: none;
+  }
+  .feat-card-img img {
+    max-width: 100%;
+    border-radius: 16px;
+    display: block;
+    box-shadow:
+      0 4px 16px rgba(0, 0, 0, 0.15),
+      0 16px 40px rgba(0, 0, 0, 0.2);
+  }
+  .feat-card-img img.card-phone {
+    max-width: 160px;
+    border-radius: 24px;
+  }
+  .feat-card-img img.card-mac {
+    max-width: 100%;
+    object-fit: contain;
+  }
+  .feat-card-body {
+    padding: 24px 28px 28px;
+  }
+  .feat-card-body .feat-row-num {
+    margin-bottom: 10px;
+  }
+  .feat-card-body h3 {
+    font-family: 'Fraunces', serif;
+    font-weight: 400;
+    font-size: 22px;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+    line-height: 1.2;
+  }
+  .feat-card-body p {
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.7;
+  }
+
+  /* ===== sections ===== */
+  section {
+    padding: 120px 0;
+    position: relative;
+  }
+  .section-label {
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section-label::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--accent);
+  }
+  h2 {
+    font-family: 'Fraunces', serif;
+    font-weight: 300;
+    font-size: clamp(36px, 5vw, 56px);
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+    margin-bottom: 24px;
+    max-width: 780px;
+  }
+  h2 em {
+    font-style: italic;
+    color: var(--accent);
+    font-weight: 400;
+  }
+  .section-sub {
+    font-size: 15px;
+    color: var(--ink-soft);
+    max-width: 580px;
+    margin-bottom: 64px;
+    line-height: 1.7;
+  }
+
+  /* (old feature grid removed — replaced by feat-row layout) */
+
+  /* ===== roadmap ===== */
+  .roadmap-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+    margin-top: 32px;
+  }
+  @media (max-width: 880px) {
+    .roadmap-grid { grid-template-columns: 1fr; }
+  }
+  .roadmap-col {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px 24px;
+  }
+  .roadmap-status {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .roadmap-shipped .roadmap-status { color: #2ecf6f; }
+  .roadmap-progress .roadmap-status { color: var(--accent); }
+  .roadmap-future .roadmap-status { color: var(--ink-mute); }
+  .roadmap-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .roadmap-col li {
+    font-size: 14px;
+    color: var(--ink-mute);
+    padding: 8px 0;
+    border-top: 1px solid var(--border);
+    line-height: 1.5;
+  }
+  .roadmap-col li:first-child { border-top: 0; padding-top: 0; }
+  .roadmap-col code {
+    background: var(--bg);
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 12px;
+    color: var(--ink);
+  }
+
+  /* ===== pricing ===== */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  @media (max-width: 720px) { .pricing-grid { grid-template-columns: 1fr; } }
+  .price-card {
+    background: var(--bg);
+    padding: 40px 36px;
+    position: relative;
+  }
+  .price-card.pro {
+    background: var(--bg-soft);
+  }
+  .price-name {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .price-tagline {
+    font-size: 13px;
+    color: var(--ink-soft);
+    margin-bottom: 28px;
+  }
+  .price-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 56px;
+    font-weight: 300;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .price-amount .unit {
+    font-size: 14px;
+    color: var(--ink-mute);
+    font-family: 'JetBrains Mono', monospace;
+    margin-left: 6px;
+  }
+  .price-note {
+    font-size: 12px;
+    color: var(--ink-mute);
+    margin-bottom: 32px;
+  }
+  .price-features {
+    list-style: none;
+    margin-bottom: 36px;
+  }
+  .price-features li {
+    padding: 10px 0;
+    border-bottom: 1px dashed var(--border-soft);
+    font-size: 13px;
+    color: var(--ink-soft);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .price-features li::before {
+    content: '+';
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .price-card.pro .price-features li.dim {
+    color: var(--ink-mute);
+  }
+  .price-card.pro .price-features li.dim::before {
+    content: '○';
+    color: var(--ink-mute);
+  }
+  .price-badge {
+    position: absolute;
+    top: 24px; right: 24px;
+    font-size: 10px;
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  /* ===== faq ===== */
+  .faq-list {
+    border-top: 1px solid var(--border);
+  }
+  .faq-item {
+    border-bottom: 1px solid var(--border);
+    padding: 24px 0;
+    cursor: pointer;
+  }
+  .faq-q {
+    font-family: 'Fraunces', serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .faq-q .plus {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--accent);
+    font-size: 18px;
+    transition: transform 0.3s;
+    flex-shrink: 0;
+  }
+  .faq-item[open] .plus { transform: rotate(45deg); }
+  .faq-a {
+    margin-top: 14px;
+    color: var(--ink-soft);
+    font-size: 13px;
+    line-height: 1.75;
+    max-width: 700px;
+  }
+
+  /* ===== footer ===== */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 60px 0 40px;
+    margin-top: 80px;
+  }
+  .foot-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr;
+    gap: 48px;
+    margin-bottom: 48px;
+  }
+  @media (max-width: 720px) {
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 32px; }
+  }
+  .foot-brand {
+    font-family: 'Fraunces', serif;
+    font-size: 32px;
+    font-style: italic;
+    margin-bottom: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .foot-brand img {
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  }
+  .foot-brand .logo-x {
+    font-size: 1.35em;
+    font-weight: 700;
+    font-style: normal;
+    letter-spacing: -0.04em;
+    margin-right: -0.12em;
+  }
+  .foot-tag {
+    font-size: 12px;
+    color: var(--ink-mute);
+    max-width: 280px;
+    line-height: 1.6;
+  }
+  .foot-author {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 12px;
+  }
+  .foot-socials {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+  }
+  .foot-socials a {
+    color: var(--ink-mute);
+    transition: color 0.2s;
+  }
+  .foot-socials a:hover {
+    color: var(--ink);
+  }
+  .foot-col h4 {
+    font-size: 11px;
+    color: var(--ink-mute);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    font-weight: 500;
+  }
+  .foot-col a {
+    display: block;
+    color: var(--ink-soft);
+    text-decoration: none;
+    font-size: 13px;
+    padding: 4px 0;
+    transition: color 0.2s;
+  }
+  .foot-col a:hover { color: var(--ink); }
+  .foot-bottom {
+    border-top: 1px solid var(--border-soft);
+    padding-top: 24px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--ink-mute);
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+
+  /* ===== kbd ===== */
+  kbd {
+    font-family: 'JetBrains Mono', monospace;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    color: var(--ink);
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><img src="xtend-icon.svg" alt="" class="logo-mark"><span class="logo-x">X</span>tend</a>
+    <div class="nav-links">
+      <a href="#features">features</a>
+      <a href="#pricing">pricing</a>
+      <a href="#roadmap">roadmap</a>
+      <a href="#faq">faq</a>
+      <div class="theme-seg" id="themeSeg" role="radiogroup" aria-label="Theme">
+        <button data-theme-set="system" aria-label="System theme">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        </button>
+        <button data-theme-set="light" aria-label="Light theme">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+        </button>
+        <button data-theme-set="dark" aria-label="Dark theme">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+      <a href="#download" class="nav-cta">get notified →</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="container hero-layout">
+    <div class="hero-text">
+      <div class="hero-meta">
+        <span class="dot"></span>
+        <span>early access</span>
+        <span class="sep">·</span>
+        <span class="v">v0.1</span>
+        <span class="sep">·</span>
+        <span>iOS 18.2+ &amp; macOS 15.2+</span>
+      </div>
+
+      <h1>
+        <em class="v-build">Build</em>, <em class="v-run">run</em>,<br />
+        and <em class="v-stream">stream</em> Xcode<br />
+        from anywhere.
+      </h1>
+
+      <p class="hero-sub">
+        Xtend turns your iPhone into a remote for your Mac. Browse projects, kick off builds, pick a simulator, and watch it stream live to your hand — over Wi-Fi, over LTE, soon over the open internet. Your dev environment, off the desk.
+      </p>
+
+      <div class="cta-row">
+        <a href="#download" class="btn btn-primary">
+          Get notified
+          <span class="arrow">→</span>
+        </a>
+        <a href="#features" class="btn btn-ghost">
+          See what it does
+        </a>
+      </div>
+
+      <p class="sys-req">
+        <span>iOS 18.2+</span><span class="sep">·</span><span>macOS 15.2+</span><span class="sep">·</span><span>Xcode 16.2+</span>
+      </p>
+    </div>
+
+    <div class="hero-banner">
+      <img src="IMG_4990.PNG" alt="Build tab" class="hero-banner-phone" />
+      <img src="IMG_4986.PNG" alt="Simulator tab" class="hero-banner-phone" />
+      <img src="IMG_4989.PNG" alt="Sessions tab" class="hero-banner-phone" />
+    </div>
+  </div>
+</header>
+
+<section id="features">
+  <div class="container">
+    <div class="section-label">Features</div>
+    <h2>The dev tools that <em>didn't fit</em> on your desk.</h2>
+    <p class="section-sub">
+      Xtend pairs a lightweight Mac server with an iOS client. Anything you'd reach for in Xcode — projects, builds, simulators, terminal — now lives in your pocket.
+    </p>
+
+    <!-- 01 · Build & Run -->
+    <div class="feat-row">
+      <div class="feat-row-text">
+        <div class="feat-row-num orange">01 · Build</div>
+        <h3 class="feat-row-title">Pick a project, hit Run</h3>
+        <p class="feat-row-desc">Browse <code>.xcodeproj</code> files on your Mac, choose a scheme, pick a simulator, and trigger Build &amp; Run from your phone. Live build logs and issue counts as it compiles.</p>
+      </div>
+      <div class="feat-row-visual glow-orange">
+        <div class="feat-row-pair">
+          <img src="IMG_4990.PNG" alt="Build tab — active build" class="feat-row-phone" />
+          <img src="IMG_4993.PNG" alt="Build tools menu" class="feat-row-phone" />
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 · Terminal -->
+    <div class="feat-row reverse">
+      <div class="feat-row-text">
+        <div class="feat-row-num magenta">02 · Session</div>
+        <h3 class="feat-row-title">Terminal in your pocket</h3>
+        <p class="feat-row-desc">A real shell on your Mac, streamed to your phone. Run scripts, peek at logs, fix a build — without walking back to your desk. Zsh, bash, fish — your shell, your <code>.zshrc</code>.</p>
+      </div>
+      <div class="feat-row-visual glow-magenta">
+        <img src="terminal-crop.png" alt="Terminal running Claude Code" class="feat-row-phone" />
+      </div>
+    </div>
+
+    <!-- 03 · Simulator Stream -->
+    <div class="feat-row">
+      <div class="feat-row-text">
+        <div class="feat-row-num teal">03 · Stream</div>
+        <h3 class="feat-row-title">Simulator, live</h3>
+        <p class="feat-row-desc">Your Mac's iOS Simulator, streamed to your iPhone. Tap the screen on your phone, the simulator on your Mac responds. Like screen-mirroring, but bidirectional.</p>
+      </div>
+      <div class="feat-row-visual glow-teal">
+        <img src="IMG_4986.PNG" alt="Simulator tab — live stream with context menu" class="feat-row-phone" />
+      </div>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-card">
+        <div class="feat-card-img">
+          <img src="notif-crop.png" alt="Xtend is waiting — notification" />
+        </div>
+        <div class="feat-card-body">
+          <div class="feat-row-num magenta">04 · Session</div>
+          <h3>Agent done? You'll know.</h3>
+          <p>When a command finishes — a build, a test suite, an AI agent — Xtend detects the prompt and pushes a notification. Tap to jump to the session.</p>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-card-img">
+          <img src="IMG_4989.PNG" alt="Active sessions" class="card-phone" />
+        </div>
+        <div class="feat-card-body">
+          <div class="feat-row-num magenta">05 · Session</div>
+          <h3>Sessions that survive</h3>
+          <p>Close the app, lock your phone — sessions keep running on the Mac.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat-grid flip">
+      <div class="feat-card">
+        <div class="feat-card-img">
+          <img src="IMG_4992.PNG" alt="Bonjour discovery" class="card-phone" />
+        </div>
+        <div class="feat-card-body">
+          <div class="feat-row-num teal">06 · Settings</div>
+          <h3>Zero-config setup</h3>
+          <p>Bonjour finds your Mac automatically. No IP, no pairing. One tap.</p>
+        </div>
+      </div>
+
+      <div class="feat-card">
+        <div class="feat-card-img">
+          <img src="mac-menu.png" alt="Xtend Host menu bar" class="card-mac" style="border-radius:12px" />
+        </div>
+        <div class="feat-card-body">
+          <div class="feat-row-num teal">07 · Mac</div>
+          <h3>Lightweight Mac server</h3>
+          <p>A menu-bar app. Pick a simulator, start the server. Stays out of your way.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="feat-grid" style="grid-template-columns:1fr; margin-top:24px">
+      <div class="feat-card">
+        <div class="feat-card-body" style="text-align:center; padding: 36px 28px">
+          <div class="feat-row-num teal">08 · Remote</div>
+          <h3>Beyond the local network</h3>
+          <p>Today: same-Wi-Fi. Soon: encrypted WebRTC peer-to-peer with TURN relay fallback. The first paid feature.</p>
+          <span class="feat-row-tag" style="margin-top:12px">coming soon</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="pricing">
+  <div class="container">
+    <div class="section-label">Pricing</div>
+    <h2>Free while it's <em>cooking</em>.<br />Paid only for the hard part.</h2>
+    <p class="section-sub">
+      Same Wi-Fi? Free, forever. Different network? That's where it gets interesting — WebRTC needs signaling and a TURN relay when direct P2P fails, both of which cost money to run. That's the one thing we'll charge for. Everything else stays free.
+    </p>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Local</div>
+        <div class="price-tagline">When your phone and Mac share a Wi-Fi</div>
+        <div class="price-amount">$0<span class="unit">/ forever</span></div>
+        <div class="price-note">No account. No telemetry. Just the two apps.</div>
+        <ul class="price-features">
+          <li>Browse, build &amp; run any Xcode project</li>
+          <li>Live build logs and issue counts</li>
+          <li>Persistent terminal sessions on your Mac</li>
+          <li>Notifications when commands finish</li>
+          <li>Filesystem browser with "Open Terminal Here"</li>
+          <li>Simulator stream over local network</li>
+          <li>Light &amp; dark themes</li>
+        </ul>
+        <a href="#download" class="btn btn-ghost" style="width:100%;justify-content:center">Get notified at launch</a>
+      </div>
+
+      <div class="price-card pro">
+        <span class="price-badge">Coming soon</span>
+        <div class="price-name">Remote</div>
+        <div class="price-tagline">When you're not on the same network</div>
+        <div class="price-amount">TBD<span class="unit">/ month</span></div>
+        <div class="price-note">Pricing announced when remote sessions ship.</div>
+        <ul class="price-features">
+          <li>Everything in Local</li>
+          <li>Encrypted WebRTC peer-to-peer (TURN relay fallback)</li>
+          <li>Build &amp; stream from your home Mac, anywhere</li>
+          <li>Persistent sessions across networks</li>
+          <li>Session recordings (limited retention)</li>
+          <li class="dim">Priority support</li>
+        </ul>
+        <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20Remote%20%E2%80%94%20notify%20me&body=Hi%20Mendy%2C%0A%0APlease%20let%20me%20know%20when%20the%20Remote%20tier%20is%20available.%0A%0AThanks%21" class="btn btn-ghost" style="width:100%;justify-content:center">Notify me when it ships →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="roadmap">
+  <div class="container">
+    <div class="section-label">Roadmap</div>
+    <h2>What's <em>shipped</em>, what's next.</h2>
+    <p class="section-sub">
+      Honest accounting of where Xtend is today and where it's headed. Dates aren't promises — software ships when it ships.
+    </p>
+
+    <div class="roadmap-grid">
+      <div class="roadmap-col roadmap-shipped">
+        <div class="roadmap-status">✓ Shipped</div>
+        <ul>
+          <li>Live simulator stream over LAN (20 fps)</li>
+          <li>Bidirectional touch from iPhone to simulator</li>
+          <li>Build &amp; Run via <code>xcodebuild</code></li>
+          <li>Live build logs &amp; issue counts</li>
+          <li>Terminal sessions (zsh / bash / fish)</li>
+          <li>Persistent PTY — sessions survive app close</li>
+          <li>Terminal-done notifications (prompt detection)</li>
+          <li>File browser + "Open Terminal Here"</li>
+          <li>Bonjour zero-config discovery</li>
+          <li>iOS light / dark mode</li>
+          <li>Xtend design system (glass cards, grid, custom fonts)</li>
+          <li>Native Mac &amp; iOS onboarding</li>
+        </ul>
+      </div>
+
+      <div class="roadmap-col roadmap-progress">
+        <div class="roadmap-status">→ Next</div>
+        <ul>
+          <li>Pairing-code authentication on the Mac server</li>
+          <li>Hardened build-cancel flow</li>
+          <li>Mac-unreachable / retry UX</li>
+          <li>Logs export for support</li>
+          <li>Auto-launch on Mac login</li>
+          <li>Sparkle-style updater for the Mac app</li>
+        </ul>
+      </div>
+
+      <div class="roadmap-col roadmap-future">
+        <div class="roadmap-status">◌ Remote tier (paid)</div>
+        <ul>
+          <li>Encrypted WebRTC peer-to-peer</li>
+          <li>TURN relay fallback for blocked NATs</li>
+          <li>Persistent sessions across networks</li>
+          <li>Pricing announced before launch</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="faq">
+  <div class="container">
+    <div class="section-label">FAQ</div>
+    <h2>Things people <em>actually ask</em>.</h2>
+
+    <div class="faq-list">
+      <details class="faq-item">
+        <summary class="faq-q">How does it actually work?<span class="plus">+</span></summary>
+        <p class="faq-a">Two apps: a small Mac server (background, menu-bar) and an iOS client. The Mac exposes your Xcode projects, terminal, and simulator stream over an HTTP endpoint — the iPhone connects to it. On the same Wi-Fi, it's a direct connection. Off-network (coming soon), the apps will negotiate an encrypted WebRTC peer-to-peer connection, falling back to a TURN relay only when direct P2P isn't possible.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Why isn't the Mac side on the App Store?<span class="plus">+</span></summary>
+        <p class="faq-a">The Mac server reads from your Xcode projects, drives <kbd>xcodebuild</kbd>, and captures the simulator window. Those operations sit outside the Mac App Store sandbox, so we distribute the Mac app directly — downloaded from this site. The iOS client ships through the App Store as normal.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Does it replace Xcode?<span class="plus">+</span></summary>
+        <p class="faq-a">No — Xcode does the actual building. Xtend drives it from your phone. Think of Xtend as a remote control that exposes the parts of Xcode you'd want when you're not at the keyboard: trigger a build, watch it run, peek at the simulator, hop into a terminal.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">Will my data leave my machine?<span class="plus">+</span></summary>
+        <p class="faq-a">In the free Local tier, no. Your iPhone talks directly to your Mac over your network — no servers in the middle, no telemetry, no account. The future Remote tier uses encrypted WebRTC peer-to-peer between your two devices; a TURN relay is used only as a fallback when direct P2P is blocked by NAT/firewalls, and only when you explicitly start an off-network session.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">When does Remote launch?<span class="plus">+</span></summary>
+        <p class="faq-a">It's the next major milestone after the local version stabilizes. Drop your email below and you'll get the build the moment it ships, plus a chance to help shape pricing.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<section id="download">
+  <div class="container" style="text-align:center; max-width:680px">
+    <div class="section-label" style="justify-content:center">Get notified</div>
+    <h2 style="margin-left:auto;margin-right:auto">Be the first to <em>know</em>.</h2>
+    <p class="section-sub" style="margin-left:auto;margin-right:auto">
+      Xtend is in early development. Drop your email and you'll get a single message the moment the first build is ready — nothing else, no list.
+    </p>
+    <div class="cta-row" style="justify-content:center">
+      <a href="https://forms.gle/zgrLMesJmEL1cgaq9" target="_blank" rel="noopener" class="btn btn-primary">Get notified <span class="arrow">→</span></a>
+      <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20notify%20me&body=Hi%20Mendy%2C%0A%0APlease%20let%20me%20know%20when%20Xtend%20is%20ready%20to%20try.%0A%0AThanks%21" class="btn btn-ghost">Or email me directly</a>
+    </div>
+    <p style="margin-top:24px;font-size:11px;color:var(--ink-mute)">
+      No newsletter. No marketing. One email when Xtend ships.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <div>
+        <div class="foot-brand"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</div>
+        <p class="foot-tag">Build, run, and stream Xcode from anywhere. Your iPhone, your Mac's remote.</p>
+        <p class="foot-author">Created by Mendy Aouizerat</p>
+        <div class="foot-socials">
+          <a href="https://github.com/mendidou" target="_blank" rel="noopener" aria-label="GitHub">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+          </a>
+          <a href="https://www.linkedin.com/in/mendy-aouizerat-057a201a0/" target="_blank" rel="noopener" aria-label="LinkedIn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+          </a>
+          <a href="mailto:maouizerat@gmail.com" aria-label="Email">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg>
+          </a>
+        </div>
+      </div>
+      <div class="foot-col">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#download">Get notified</a>
+        <a href="#">Changelog</a>
+      </div>
+      <div class="foot-col">
+        <h4>Resources</h4>
+        <a href="#faq">FAQ</a>
+        <a href="support.html">Support</a>
+      </div>
+      <div class="foot-col">
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="acknowledgements.html">Acknowledgements</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Xtend © 2026. Modern development tools for the mobile era.</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function() {
+    var KEY = 'xtend-theme-mode';   // stores: 'system' | 'light' | 'dark'
+    var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+
+    function osTheme() {
+      return mq && mq.matches ? 'light' : 'dark';
+    }
+    function readMode() {
+      try { return localStorage.getItem(KEY) || 'system'; } catch (e) { return 'system'; }
+    }
+    function writeMode(mode) {
+      try { localStorage.setItem(KEY, mode); } catch (e) {}
+    }
+    function applyMode(mode) {
+      var resolved = mode === 'system' ? osTheme() : mode;
+      document.documentElement.setAttribute('data-theme', resolved);
+      // Force color-scheme too — overrides OS for browser-rendered UI (scrollbars, focus rings, form controls)
+      document.documentElement.style.colorScheme = resolved;
+      // sync the segmented control
+      var seg = document.getElementById('themeSeg');
+      if (seg) {
+        var btns = seg.querySelectorAll('button');
+        for (var i = 0; i < btns.length; i++) {
+          btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-theme-set') === mode ? 'true' : 'false');
+        }
+      }
+    }
+
+    // initial paint
+    var mode = readMode();
+    applyMode(mode);
+
+    // wire up segmented control
+    var seg = document.getElementById('themeSeg');
+    if (seg) {
+      seg.addEventListener('click', function(e) {
+        var btn = e.target.closest('button[data-theme-set]');
+        if (!btn) return;
+        var newMode = btn.getAttribute('data-theme-set');
+        writeMode(newMode);
+        applyMode(newMode);
+      });
+    }
+
+    // listen for OS changes — only matters when mode === 'system'
+    if (mq) {
+      var listener = function() {
+        if (readMode() === 'system') applyMode('system');
+      };
+      if (mq.addEventListener) mq.addEventListener('change', listener);
+      else if (mq.addListener) mq.addListener(listener);
+    }
+  })();
+</script>
+
+</body>
+</html>

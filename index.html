@@ -403,11 +403,54 @@
   .hero-banner {
     position: relative;
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    opacity: 0;
+    animation: fadeUp 1s 0.5s ease-out forwards;
+  }
+  .hero-app-badge {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 2;
+  }
+  .hero-app-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 18px;
+    box-shadow:
+      0 0 16px rgba(90, 181, 255, 0.2),
+      0 0 32px rgba(90, 181, 255, 0.1);
+    transition: box-shadow 0.4s ease;
+  }
+  .hero-app-icon:hover {
+    box-shadow:
+      0 0 24px rgba(90, 181, 255, 0.35),
+      0 0 48px rgba(90, 181, 255, 0.15);
+  }
+  [data-theme="light"] .hero-app-icon {
+    box-shadow:
+      0 0 12px rgba(31, 125, 224, 0.15),
+      0 4px 12px rgba(0, 0, 0, 0.06);
+  }
+  .hero-app-name {
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 500;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+  }
+  .hero-app-name .logo-x {
+    margin-right: 0.05em;
+  }
+  .hero-phones {
+    display: flex;
     justify-content: center;
     gap: 12px;
     align-items: flex-start;
-    opacity: 0;
-    animation: fadeUp 1s 0.5s ease-out forwards;
   }
   .hero-banner-phone {
     width: 185px;
@@ -1069,9 +1112,15 @@
     </div>
 
     <div class="hero-banner">
-      <img src="IMG_4990.PNG" alt="Build tab" class="hero-banner-phone" />
-      <img src="IMG_4986.PNG" alt="Simulator tab" class="hero-banner-phone" />
-      <img src="IMG_4989.PNG" alt="Sessions tab" class="hero-banner-phone" />
+      <div class="hero-app-badge">
+        <img src="app-icon.png" alt="Xtend" class="hero-app-icon" />
+        <span class="hero-app-name"><span class="logo-x">X</span>tend</span>
+      </div>
+      <div class="hero-phones">
+        <img src="IMG_4990.PNG" alt="Build tab" class="hero-banner-phone" />
+        <img src="IMG_4986.PNG" alt="Simulator tab" class="hero-banner-phone" />
+        <img src="IMG_4989.PNG" alt="Sessions tab" class="hero-banner-phone" />
+      </div>
     </div>
   </div>
 </header>

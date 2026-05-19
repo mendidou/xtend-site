@@ -9,13 +9,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Acknowledgements — Xtend" />
 <meta property="og:description" content="Open-source projects Xtend builds on." />
-<meta property="og:url" content="https://xtend.app/acknowledgements.html" />
-<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:url" content="https://mendidou.github.io/xtend-site/acknowledgements.html" />
+<meta property="og:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Acknowledgements — Xtend" />
 <meta name="twitter:description" content="Open-source projects Xtend builds on." />
-<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+<meta name="twitter:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 
 <link rel="icon" type="image/svg+xml" href="xtend-icon.svg">
 <link rel="apple-touch-icon" href="xtend-og.png">
@@ -67,7 +67,7 @@
 
 <nav>
   <div class="nav-inner">
-    <a href="xtend-landing.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
+    <a href="index.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
   </div>
 </nav>
 
@@ -77,38 +77,50 @@
   <p class="lede">Xtend uses the following open-source projects. Thank you to their authors and contributors.</p>
 
   <div class="credit">
+    <div class="credit-name"><a href="https://github.com/stasel/WebRTC" target="_blank" rel="noopener">WebRTC</a></div>
+    <div class="credit-license">BSD 3-Clause</div>
+    <div class="credit-desc">Google's WebRTC implementation, packaged as a Swift Package by stasel. Powers the iPhone ↔ Mac peer connection (DTLS-SRTP media, SCTP data channels).</div>
+  </div>
+
+  <div class="credit">
     <div class="credit-name"><a href="https://github.com/migueldeicaza/SwiftTerm" target="_blank" rel="noopener">SwiftTerm</a></div>
     <div class="credit-license">MIT License</div>
     <div class="credit-desc">Terminal emulator by Miguel de Icaza, used for the Mac-side PTY relay.</div>
   </div>
 
   <div class="credit">
-    <div class="credit-name"><a href="https://github.com/apple/swift-nio" target="_blank" rel="noopener">SwiftNIO</a></div>
+    <div class="credit-name"><a href="https://github.com/apple/swift-argument-parser" target="_blank" rel="noopener">swift-argument-parser</a></div>
     <div class="credit-license">Apache 2.0</div>
-    <div class="credit-desc">Cross-platform asynchronous event-driven networking framework by Apple.</div>
-  </div>
-
-  <div class="credit">
-    <div class="credit-name"><a href="https://github.com/apple/swift-nio-ssh" target="_blank" rel="noopener">SwiftNIO SSH</a></div>
-    <div class="credit-license">Apache 2.0</div>
-    <div class="credit-desc">SSH client implementation built on SwiftNIO; used for the optional remote-shell mode.</div>
+    <div class="credit-desc">Apple's argument-parsing framework, used by build-tooling helpers inside the project.</div>
   </div>
 
   <div class="credit">
     <div class="credit-name"><a href="https://xtermjs.org" target="_blank" rel="noopener">xterm.js</a></div>
     <div class="credit-license">MIT License</div>
-    <div class="credit-desc">Web-based terminal emulator embedded in the iOS terminal view.</div>
+    <div class="credit-desc">Web-based terminal emulator embedded in the iOS terminal view (rendered inside a WKWebView).</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/panva/jose" target="_blank" rel="noopener">jose</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">JWT / JWS implementation used server-side to sign Xtend session tokens and verify Apple ID tokens during Sign-in-with-Apple flow.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/websockets/ws" target="_blank" rel="noopener">ws</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Node.js WebSocket server used by our signaling backend to shuttle WebRTC handshake messages between the iPhone and the Mac.</div>
   </div>
 
   <div class="credit">
     <div class="credit-name"><a href="https://fonts.google.com/specimen/Fraunces" target="_blank" rel="noopener">Fraunces</a> &amp; <a href="https://fonts.google.com/specimen/JetBrains+Mono" target="_blank" rel="noopener">JetBrains Mono</a></div>
     <div class="credit-license">SIL Open Font License 1.1</div>
-    <div class="credit-desc">Display and monospace fonts used on this website.</div>
+    <div class="credit-desc">Display and monospace fonts used on this website and in the app.</div>
   </div>
 
   <p style="margin-top:32px;font-size:13px;color:var(--ink-mute)">Trademarks: Xcode, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. Xtend is not affiliated with Apple Inc.</p>
 
-  <a href="xtend-landing.html" class="back">← Back to Xtend</a>
+  <a href="index.html" class="back">← Back to Xtend</a>
 </div>
 
 <footer class="site-footer">

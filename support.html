@@ -9,13 +9,13 @@
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Support — Xtend" />
 <meta property="og:description" content="Email support, FAQ, and common troubleshooting topics for Xtend." />
-<meta property="og:url" content="https://xtend.app/support.html" />
-<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:url" content="https://mendidou.github.io/xtend-site/support.html" />
+<meta property="og:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Support — Xtend" />
 <meta name="twitter:description" content="Email support, FAQ, and common troubleshooting topics for Xtend." />
-<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+<meta name="twitter:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 
 <link rel="icon" type="image/svg+xml" href="xtend-icon.svg">
 <link rel="apple-touch-icon" href="xtend-og.png">
@@ -72,7 +72,7 @@
 
 <nav>
   <div class="nav-inner">
-    <a href="xtend-landing.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
+    <a href="index.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
   </div>
 </nav>
 
@@ -88,8 +88,8 @@
 
   <h2>Common topics</h2>
   <ul>
-    <li><strong>Setup &amp; pairing</strong> — your iPhone and Mac must be on the same Wi-Fi; Bonjour discovery happens automatically.</li>
-    <li><strong>Network trust</strong> — use Xtend on networks you trust (home, office). The Mac companion currently accepts connections from any device on the same Wi-Fi. Pairing-code authentication is on the roadmap.</li>
+    <li><strong>Setup &amp; pairing</strong> — sign in with the same Apple ID on both your iPhone and your Mac. The iPhone automatically discovers and pairs with the Mac registered under your account. Bonjour handles same-Wi-Fi discovery; cellular / off-network requires an active Premium subscription.</li>
+    <li><strong>Account &amp; device security</strong> — every signaling and TURN request is authenticated with a Sign-in-with-Apple-backed session token. Only the device signed in to your Apple ID can join your session. WebRTC media is end-to-end encrypted (DTLS-SRTP); even the TURN relay sees encrypted bytes only.</li>
     <li><strong>Mac permission prompts</strong> — Screen Recording and Accessibility are required for the Mac companion to capture the simulator and forward touch events.</li>
     <li><strong>Connection drops</strong> — most often caused by Wi-Fi roaming or VPNs. The app retries automatically.</li>
     <li><strong>Build / scheme detection</strong> — the Mac runs <code>xcodebuild -list</code> on your <code>.xcodeproj</code>; if no schemes appear, open the project in Xcode at least once first.</li>
@@ -128,7 +128,7 @@
   <h2>System requirements</h2>
   <p>iOS 18.2 or later · macOS 15.2 or later · Xcode 16.2 or later.</p>
 
-  <a href="xtend-landing.html" class="back">← Back to Xtend</a>
+  <a href="index.html" class="back">← Back to Xtend</a>
 </div>
 
 <footer class="site-footer">

@@ -10,15 +10,15 @@
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Xtend — extend your simulator" />
 <meta property="og:description" content="Mirror, control, and stream your iOS Simulator to your iPhone. iOS 18.2+ · macOS 15.2+." />
-<meta property="og:url" content="https://xtend.app/" />
-<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:url" content="https://mendidou.github.io/xtend-site/" />
+<meta property="og:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 <meta property="og:image:width" content="1024" />
 <meta property="og:image:height" content="1024" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Xtend — extend your simulator" />
 <meta name="twitter:description" content="Mirror, control, and stream your iOS Simulator to your iPhone. iOS 18.2+ · macOS 15.2+." />
-<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+<meta name="twitter:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 
 <link rel="icon" type="image/png" href="app-icon.png" />
 <link rel="apple-touch-icon" href="xtend-og.png" />
@@ -1096,7 +1096,7 @@
       </h1>
 
       <p class="hero-sub">
-        Xtend turns your iPhone into a remote for your Mac. Browse projects, kick off builds, pick a simulator, and watch it stream live to your hand — over Wi-Fi, over LTE, soon over the open internet. Your dev environment, off the desk.
+        Xtend turns your iPhone into a remote for your Mac. Browse projects, kick off builds, pick a simulator, and watch it stream live to your hand — over Wi-Fi, over LTE, anywhere on the open internet. Your dev environment, off the desk.
       </p>
 
       <div class="cta-row">
@@ -1206,8 +1206,8 @@
         </div>
         <div class="feat-card-body">
           <div class="feat-row-num teal">06 · Settings</div>
-          <h3>Zero-config setup</h3>
-          <p>Bonjour finds your Mac automatically. No IP, no pairing. One tap.</p>
+          <h3>One-tap setup</h3>
+          <p>Sign in with Apple on both devices — the iPhone discovers your Mac automatically via Bonjour. No IP, no pairing code, no server URL.</p>
         </div>
       </div>
 
@@ -1228,8 +1228,8 @@
         <div class="feat-card-body" style="text-align:center; padding: 36px 28px">
           <div class="feat-row-num teal">08 · Remote</div>
           <h3>Beyond the local network</h3>
-          <p>Today: same-Wi-Fi. Soon: encrypted WebRTC peer-to-peer with TURN relay fallback. The first paid feature.</p>
-          <span class="feat-row-tag" style="margin-top:12px">coming soon</span>
+          <p>Encrypted WebRTC peer-to-peer between your iPhone and Mac. TURN relay fallback when direct P2P is blocked by NAT. The first paid feature.</p>
+          <span class="feat-row-tag" style="margin-top:12px">included in Premium</span>
         </div>
       </div>
     </div>
@@ -1241,7 +1241,7 @@
     <div class="section-label">Pricing</div>
     <h2>Free while it's <em>cooking</em>.<br />Paid only for the hard part.</h2>
     <p class="section-sub">
-      Same Wi-Fi? Free, forever. Different network? That's where it gets interesting — WebRTC needs signaling and a TURN relay when direct P2P fails, both of which cost money to run. That's the one thing we'll charge for. Everything else stays free.
+      Same Wi-Fi? Free, forever. Different network? That's the paid part — WebRTC signaling and a TURN relay (for when direct P2P is blocked by NAT) both cost money to run, so off-network is the one thing we charge for. Everything else stays free.
     </p>
 
     <div class="pricing-grid">
@@ -1249,7 +1249,7 @@
         <div class="price-name">Local</div>
         <div class="price-tagline">When your phone and Mac share a Wi-Fi</div>
         <div class="price-amount">$0<span class="unit">/ forever</span></div>
-        <div class="price-note">No account. No telemetry. Just the two apps.</div>
+        <div class="price-note">Sign in with Apple. No telemetry. No third-party analytics.</div>
         <ul class="price-features">
           <li>Browse, build &amp; run any Xcode project</li>
           <li>Live build logs and issue counts</li>
@@ -1266,15 +1266,14 @@
         <span class="price-badge">Coming soon</span>
         <div class="price-name">Remote</div>
         <div class="price-tagline">When you're not on the same network</div>
-        <div class="price-amount">TBD<span class="unit">/ month</span></div>
-        <div class="price-note">Pricing announced when remote sessions ship.</div>
+        <div class="price-amount">$4.99<span class="unit">/ month</span></div>
+        <div class="price-note">1-week free trial. Auto-renews via Apple, cancel anytime in Settings. Pricing may vary by region.</div>
         <ul class="price-features">
           <li>Everything in Local</li>
           <li>Encrypted WebRTC peer-to-peer (TURN relay fallback)</li>
           <li>Build &amp; stream from your home Mac, anywhere</li>
+          <li>End-to-end DTLS-SRTP — TURN sees encrypted bytes only</li>
           <li>Persistent sessions across networks</li>
-          <li>Session recordings (limited retention)</li>
-          <li class="dim">Priority support</li>
         </ul>
         <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20Remote%20%E2%80%94%20notify%20me&body=Hi%20Mendy%2C%0A%0APlease%20let%20me%20know%20when%20the%20Remote%20tier%20is%20available.%0A%0AThanks%21" class="btn btn-ghost" style="width:100%;justify-content:center">Notify me when it ships →</a>
       </div>
@@ -1303,6 +1302,10 @@
           <li>Terminal-done notifications (prompt detection)</li>
           <li>File browser + "Open Terminal Here"</li>
           <li>Bonjour zero-config discovery</li>
+          <li>Sign in with Apple — single-account pairing</li>
+          <li>Remote tier — encrypted WebRTC + TURN fallback</li>
+          <li>Premium subscription via App Store ($4.99/mo, 1-week trial)</li>
+          <li>In-app account deletion</li>
           <li>iOS light / dark mode</li>
           <li>Xtend design system (glass cards, grid, custom fonts)</li>
           <li>Native Mac &amp; iOS onboarding</li>
@@ -1312,9 +1315,9 @@
       <div class="roadmap-col roadmap-progress">
         <div class="roadmap-status">→ Next</div>
         <ul>
-          <li>Pairing-code authentication on the Mac server</li>
+          <li>App Store submission &amp; public release</li>
           <li>Hardened build-cancel flow</li>
-          <li>Mac-unreachable / retry UX</li>
+          <li>Mac-unreachable / retry UX polish</li>
           <li>Logs export for support</li>
           <li>Auto-launch on Mac login</li>
           <li>Sparkle-style updater for the Mac app</li>
@@ -1322,12 +1325,12 @@
       </div>
 
       <div class="roadmap-col roadmap-future">
-        <div class="roadmap-status">◌ Remote tier (paid)</div>
+        <div class="roadmap-status">◌ Later</div>
         <ul>
-          <li>Encrypted WebRTC peer-to-peer</li>
-          <li>TURN relay fallback for blocked NATs</li>
-          <li>Persistent sessions across networks</li>
-          <li>Pricing announced before launch</li>
+          <li>Multiple Macs per account</li>
+          <li>Session recordings (limited retention)</li>
+          <li>Team / org accounts</li>
+          <li>Priority support tier</li>
         </ul>
       </div>
     </div>
@@ -1342,12 +1345,12 @@
     <div class="faq-list">
       <details class="faq-item">
         <summary class="faq-q">How does it actually work?<span class="plus">+</span></summary>
-        <p class="faq-a">Two apps: a small Mac server (background, menu-bar) and an iOS client. The Mac exposes your Xcode projects, terminal, and simulator stream over an HTTP endpoint — the iPhone connects to it. On the same Wi-Fi, it's a direct connection. Off-network (coming soon), the apps will negotiate an encrypted WebRTC peer-to-peer connection, falling back to a TURN relay only when direct P2P isn't possible.</p>
+        <p class="faq-a">Two apps: a Mac companion (menu-bar) and an iOS client. They pair through Sign in with Apple, then open an end-to-end encrypted WebRTC connection between your iPhone and your Mac. On the same Wi-Fi the connection is direct host-to-host. Off your local network, ICE negotiates a NAT-traversal path; if direct P2P is blocked, the apps fall back to a Cloudflare TURN relay. Either way the media (video, touches, terminal, build commands) is protected by DTLS-SRTP — only your iPhone and your Mac hold the keys.</p>
       </details>
 
       <details class="faq-item">
         <summary class="faq-q">Why isn't the Mac side on the App Store?<span class="plus">+</span></summary>
-        <p class="faq-a">The Mac server reads from your Xcode projects, drives <kbd>xcodebuild</kbd>, and captures the simulator window. Those operations sit outside the Mac App Store sandbox, so we distribute the Mac app directly — downloaded from this site. The iOS client ships through the App Store as normal.</p>
+        <p class="faq-a">The Mac companion reads from your Xcode projects, drives <kbd>xcodebuild</kbd>, and captures the simulator window. Those operations sit outside the Mac App Store sandbox, so the Mac app will be distributed directly from this site at launch. The iOS client ships through the App Store as normal.</p>
       </details>
 
       <details class="faq-item">
@@ -1357,12 +1360,17 @@
 
       <details class="faq-item">
         <summary class="faq-q">Will my data leave my machine?<span class="plus">+</span></summary>
-        <p class="faq-a">In the free Local tier, no. Your iPhone talks directly to your Mac over your network — no servers in the middle, no telemetry, no account. The future Remote tier uses encrypted WebRTC peer-to-peer between your two devices; a TURN relay is used only as a fallback when direct P2P is blocked by NAT/firewalls, and only when you explicitly start an off-network session.</p>
+        <p class="faq-a">Sign in with Apple is required so the iPhone can find the Mac that belongs to your account — that single auth handshake goes to our server. Beyond that, your simulator stream, terminal data, and build commands flow directly between your iPhone and your Mac over end-to-end DTLS-SRTP — our signaling server only relays the initial WebRTC handshake, not media. When you're off your local network, a Cloudflare TURN relay forwards encrypted bytes only; it can never decrypt your session. No analytics, no telemetry, no third-party SDKs in either app.</p>
       </details>
 
       <details class="faq-item">
-        <summary class="faq-q">When does Remote launch?<span class="plus">+</span></summary>
-        <p class="faq-a">It's the next major milestone after the local version stabilizes. Drop your email below and you'll get the build the moment it ships, plus a chance to help shape pricing.</p>
+        <summary class="faq-q">How much does Premium cost?<span class="plus">+</span></summary>
+        <p class="faq-a">$4.99 / month with a 1-week free trial. Billing is handled entirely by Apple through the App Store — you can cancel any time in Settings → your Apple ID → Subscriptions. Local-network mirroring stays free; Premium unlocks the cellular / remote-network path. Pricing may vary by storefront.</p>
+      </details>
+
+      <details class="faq-item">
+        <summary class="faq-q">When does Xtend launch?<span class="plus">+</span></summary>
+        <p class="faq-a">Both Local and Remote tiers are built and bundled into the app. We're preparing for App Store submission; the Mac companion will follow at the same time. Drop your email below and you'll get a single message the moment the first build is ready.</p>
       </details>
     </div>
   </div>

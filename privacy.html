@@ -4,18 +4,18 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Privacy Policy — Xtend</title>
-<meta name="description" content="Xtend privacy policy: what data we collect (none), what permissions we ask for, and how the local-only architecture works.">
+<meta name="description" content="Xtend privacy policy: what data we collect, what permissions we ask for, and how the LAN + Remote architecture works.">
 
 <meta property="og:type" content="article" />
 <meta property="og:title" content="Privacy Policy — Xtend" />
-<meta property="og:description" content="Xtend collects no personal data. GDPR & CCPA compliant by design." />
-<meta property="og:url" content="https://xtend.app/privacy.html" />
-<meta property="og:image" content="https://xtend.app/xtend-og.png" />
+<meta property="og:description" content="Xtend privacy policy: SIWA account, no analytics, end-to-end encrypted WebRTC. GDPR & CCPA compliant." />
+<meta property="og:url" content="https://mendidou.github.io/xtend-site/privacy.html" />
+<meta property="og:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Privacy Policy — Xtend" />
-<meta name="twitter:description" content="Xtend collects no personal data. GDPR & CCPA compliant by design." />
-<meta name="twitter:image" content="https://xtend.app/xtend-og.png" />
+<meta name="twitter:description" content="Xtend privacy policy: SIWA account, no analytics, end-to-end encrypted WebRTC." />
+<meta name="twitter:image" content="https://mendidou.github.io/xtend-site/xtend-og.png" />
 
 <link rel="icon" type="image/svg+xml" href="xtend-icon.svg">
 <link rel="apple-touch-icon" href="xtend-og.png">
@@ -75,76 +75,96 @@
 
 <nav>
   <div class="nav-inner">
-    <a href="xtend-landing.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
+    <a href="index.html"><img src="xtend-icon.svg" alt=""><span class="logo-x">X</span>tend</a>
   </div>
 </nav>
 
 <div class="container">
   <span class="label">Privacy</span>
   <h1>What Xtend does <em>and doesn't</em> collect.</h1>
-  <p class="lede">Short version: nothing leaves your devices. Long version below.</p>
+  <p class="lede">Sign in with Apple to pair your devices; everything else stays between your iPhone and your Mac.</p>
 
   <div style="background:var(--bg-elev);border:1px solid var(--border);border-radius:14px;padding:20px 24px;margin-bottom:32px">
     <strong style="color:var(--ink);font-size:14px;letter-spacing:0.02em;text-transform:uppercase">At a glance</strong>
     <ul style="margin-top:10px;margin-bottom:0">
-      <li>No personal data collected, stored, or transmitted to our servers.</li>
-      <li>No accounts. No telemetry. No analytics. No advertising. No tracking.</li>
-      <li>iPhone ⇄ Mac communication is direct over your Wi-Fi (Local tier).</li>
-      <li>GDPR &amp; CCPA compliant by design (no data to access or delete).</li>
-      <li>Permissions are optional or scoped to the feature that needs them.</li>
+      <li>Sign in with Apple is required so the iPhone can find your Mac. We store your Apple user ID, name, and email (or hide-my-email proxy) — nothing else about you.</li>
+      <li>Your simulator stream, touches, terminal data, and build commands flow directly between your iPhone and your Mac over end-to-end encrypted WebRTC (DTLS-SRTP). We never see them.</li>
+      <li>No telemetry. No analytics. No advertising. No tracking. No third-party SDKs.</li>
+      <li>You can delete your account from inside the app at any time.</li>
+      <li>GDPR &amp; CCPA compliant.</li>
     </ul>
   </div>
 
   <h2>Data we collect</h2>
-  <p>None. Xtend does not collect, store, or transmit any personal data, usage analytics, telemetry, or crash reports to our servers. There are no accounts, no sign-ups, and no tracking.</p>
+  <p>To sign you in and pair your iPhone with your Mac, our authentication server stores a small record per account:</p>
+  <ul>
+    <li><strong>Apple user identifier (sub)</strong> — a stable opaque ID Apple gives us when you sign in. Not your Apple ID email, not your name.</li>
+    <li><strong>Email address</strong> — your real email if you allowed it during Sign in with Apple, or Apple's hide-my-email proxy otherwise. Used only to identify your account; we don't send marketing.</li>
+    <li><strong>Display name</strong> — only the name you choose to share at first sign-in. Apple discloses the name once; we keep it so the app can greet you.</li>
+    <li><strong>Apple refresh token</strong> — issued by Apple. Used to revoke your session if you delete your account, and never sent anywhere except Apple.</li>
+    <li><strong>Mac registration info</strong> — a Mac identifier (a UUID) and the Mac's display name (e.g. "Mendy's MacBook Air"), so the iPhone knows which Mac to pair with. One Mac per account.</li>
+    <li><strong>IP address (transient)</strong> — your IP is visible to the signaling and TURN servers during a connection. We do not store full IPs; server logs record only a masked prefix (the first 4 IPv6 groups), retained for a short rolling window for operational diagnostics.</li>
+  </ul>
+  <p>We do <strong>not</strong> collect: contacts, photos, location, device identifiers (IDFA / IDFV), keystrokes, terminal output, simulator frames, browsing history, or analytics events. The signaling server never sees the contents of your WebRTC session — that traffic is end-to-end encrypted.</p>
 
-  <h2>How Xtend works on your network</h2>
-  <p>The Local tier is a peer-to-peer connection between the iOS app and the macOS companion over your Wi-Fi. The simulator stream, touch events, build commands, and terminal data flow directly between your iPhone and your Mac on your local network. Nothing is routed through a third party.</p>
+  <h2>How Xtend connects your iPhone and your Mac</h2>
+  <p>Xtend establishes a direct peer-to-peer WebRTC connection between your devices. There are two reachability scenarios:</p>
+  <ul>
+    <li><strong>Same Wi-Fi (LAN):</strong> the iPhone discovers the Mac via Bonjour/mDNS on your local network. Once discovered, the iPhone and Mac exchange ICE candidates through our signaling server and then establish a direct host-to-host UDP path. Media never leaves your local network.</li>
+    <li><strong>Different network (e.g. cellular):</strong> ICE selects a NAT-traversal path. When direct UDP is not possible, the WebRTC stack falls back to a TURN relay. We use Cloudflare TURN with ephemeral credentials. The TURN relay forwards encrypted bytes only — it cannot decrypt your media, touches, or terminal data.</li>
+  </ul>
+  <p>In both cases, the media (video, touches, terminal, build commands) is protected by DTLS-SRTP. The encryption keys are negotiated directly between your iPhone and your Mac — nothing in the middle (signaling server, TURN relay) holds them.</p>
 
   <h2>Permissions Xtend asks for</h2>
   <ul>
-    <li><strong>Local Network</strong> (iOS): required to discover and connect to your Mac via Bonjour.</li>
-    <li><strong>Microphone</strong> (iOS, optional): only used if you enable voice-to-text input in the terminal. Audio is sent to Apple's <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;font-size:12px">SFSpeechRecognizer</code> for transcription, governed by <a href="https://www.apple.com/legal/privacy/" style="color:var(--ink)">Apple's Privacy Policy</a>. Xtend does not record, store, or forward your audio anywhere else.</li>
-    <li><strong>Speech Recognition</strong> (iOS, optional): same as above; required by Apple to enable speech-to-text input.</li>
-    <li><strong>Screen Recording</strong> (macOS): required so the Mac companion can capture the iOS Simulator window for streaming. Granted via System Settings; revocable at any time.</li>
-    <li><strong>Accessibility</strong> (macOS): required to forward touch and keyboard events from your iPhone into the simulator.</li>
+    <li><strong>Local Network</strong> (iOS): required to discover your Mac via Bonjour and confirm both devices are on the same Wi-Fi. If you deny this permission Xtend cannot verify same-LAN status, so the Premium gate will engage even at home — Premium subscribers can still connect via the relayed path, but free LAN use will not work until you grant permission.</li>
+    <li><strong>Sign in with Apple</strong> (iOS &amp; macOS): required to identify your account so the iPhone and Mac can pair.</li>
+    <li><strong>Screen Recording</strong> (macOS): required so the Mac companion can capture the iOS Simulator window for streaming. Granted via System Settings → Privacy &amp; Security; revocable at any time.</li>
+    <li><strong>Accessibility</strong> (macOS): required to forward touch and keyboard events from your iPhone into the Simulator.</li>
   </ul>
 
+  <h2>Subscriptions and payments</h2>
+  <p>Xtend Premium is a subscription managed entirely by Apple via the App Store. We never see your credit card, billing address, or payment details — Apple handles all of that. Subscription status is checked on-device by Apple's StoreKit framework; the App Store transaction receipt is <strong>not</strong> sent to our servers. The app simply asks the operating system whether you have an active subscription, and unlocks premium features accordingly. Subscription billing, renewals, refunds, and cancellation are governed by <a href="https://www.apple.com/legal/internet-services/itunes/" style="color:var(--ink)">Apple's Media Services Terms</a>. To cancel auto-renewal, open Settings → your Apple ID → Subscriptions on your iPhone.</p>
+
   <h2>Third-party services</h2>
-  <p>None in the Local tier. No analytics SDKs, no crash reporting services, no advertising networks. The future Remote tier (not yet shipping) will use encrypted WebRTC peer-to-peer between your iPhone and Mac, with a TURN relay used only as a fallback when direct P2P cannot be established. Details and a separate addendum will be published before that feature ships.</p>
+  <p>We use the following external services, each scoped to a specific function:</p>
+  <ul>
+    <li><strong>Apple Sign in with Apple</strong> — authenticates your account. Governed by <a href="https://www.apple.com/legal/privacy/" style="color:var(--ink)">Apple's Privacy Policy</a>.</li>
+    <li><strong>Apple StoreKit / App Store</strong> — handles subscription billing.</li>
+    <li><strong>Fly.io</strong> — hosts our signaling server (matches your iPhone with your Mac and shuttles WebRTC handshake messages between them). Logs include masked IPs and operational metadata only; never WebRTC payload.</li>
+    <li><strong>Cloudflare</strong> — provides the TURN relay used as a fallback for WebRTC when direct P2P is not possible. Relay packets are encrypted with DTLS-SRTP — Cloudflare cannot decrypt them.</li>
+  </ul>
+  <p>No analytics SDKs. No crash reporting services. No advertising networks. No social-login providers other than Apple.</p>
 
   <h2>Data retention &amp; deletion</h2>
-  <p>Because Xtend does not collect or store any personal data on our servers, there is nothing to retain and nothing to delete. The only data Xtend handles — your simulator stream, terminal sessions, and build output — flows live between your iPhone and your Mac and is never written to remote storage. When the connection ends, the data is gone.</p>
+  <p>Account records (Apple user ID, name, email, Mac registration) are retained for as long as your Xtend account exists. WebRTC media and terminal traffic is never stored — it flows live between your devices and is gone when the connection closes.</p>
+  <p>You can delete your Xtend account at any time from inside the iOS app: <strong>Settings → Account → Delete Account</strong>. Deletion permanently removes your account record from our authentication server, evicts any paired Mac, and revokes your Sign in with Apple grant with Apple. Active subscriptions are managed separately by Apple — to also stop subscription billing, cancel auto-renewal in Settings → your Apple ID → Subscriptions.</p>
 
   <h2>Your privacy rights (GDPR, CCPA &amp; others)</h2>
-  <p>Xtend is designed to be compliant with the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA) by collecting no personal data at all. The rights granted by these laws — access, correction, deletion, portability, and opt-out of sale — are trivially satisfied: there is no data on file to access, correct, delete, port, or sell.</p>
-
-  <p><strong>How to exercise your rights:</strong> if you believe Xtend is processing data about you, email <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20data%20rights%20request" style="color:var(--ink)">Maouizerat@gmail.com</a> with the subject "Data Rights Request" and a description of what you'd like to access, correct, port, delete, or restrict. We will respond within <strong>30 days</strong>. Because no personal data is collected, the response will typically be a confirmation that no records exist.</p>
-
-  <p><strong>Legal basis (GDPR Art. 6):</strong> Xtend does not collect personal data, so no legal basis for processing is required. If a future feature changes this, the legal basis will be disclosed before that feature ships.</p>
-
-  <p><strong>"Do Not Track":</strong> Xtend does not use tracking technologies regardless of DNT signal. The website honors DNT by default since it has no tracking to enable.</p>
-
-  <p><strong>International transfers:</strong> No data leaves your devices in the Local tier. The optional iOS speech-to-text feature uses Apple's <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;font-size:12px">SFSpeechRecognizer</code>, which may transmit short audio snippets to Apple's servers, located in regions covered by Apple's own data-transfer agreements (including SCCs for EU users).</p>
+  <p>If you're in the EU, UK, or California, you have rights under the GDPR and CCPA to access, correct, port, restrict, or delete the personal data we hold about you, and to object to certain processing.</p>
+  <p><strong>How to exercise your rights:</strong> the fastest path for deletion is the in-app <strong>Delete Account</strong> button. For access, correction, portability, or other requests, email <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20data%20rights%20request" style="color:var(--ink)">Maouizerat@gmail.com</a> with the subject "Data Rights Request" and a description of what you want. We will respond within <strong>30 days</strong>. Because we only store the minimal account record described above, most requests result in a copy of that record or a confirmation of deletion.</p>
+  <p><strong>Legal basis (GDPR Art. 6):</strong> performance of the contract with you (account creation and the paired-device service you signed up for), and our legitimate interest in preventing fraud and abuse of the service.</p>
+  <p><strong>"Do Not Track":</strong> Xtend does not use tracking technologies regardless of DNT signal. This website uses no analytics or tracking either.</p>
+  <p><strong>International transfers:</strong> our signaling server runs on Fly.io in the Frankfurt region (EU). Cloudflare TURN routes via Cloudflare's global edge. Apple services (Sign in with Apple, StoreKit) are operated by Apple under their own terms and may transit to Apple-controlled regions, including under EU Standard Contractual Clauses where applicable.</p>
 
   <h2>Security</h2>
-  <p>The Local tier relies on the security of your home or office Wi-Fi network. Communication between the iPhone and Mac stays on your local segment; we recommend running Xtend on networks with WPA2 or WPA3 encryption. No credentials are stored on remote servers because there are no remote servers in the Local tier. The future Remote tier will use end-to-end encryption between paired devices; that addendum will detail the cryptographic design before launch.</p>
+  <p>All client-to-server traffic uses TLS 1.2+ (HTTPS for auth and management endpoints, WSS for signaling). All WebRTC media uses DTLS-SRTP — the encryption keys are negotiated end-to-end between your iPhone and your Mac, not held by any intermediary. Session tokens are stored on-device in the iOS Keychain with <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;font-size:12px">kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code> (survives reboot, never syncs, never leaves the device). The Apple refresh token is held server-side, used only to revoke your session on account deletion, and never exposed to the client.</p>
 
   <h2>Cookies &amp; tracking technologies</h2>
   <p>Xtend's iOS and macOS apps do not use cookies, web beacons, fingerprinting, or any tracking technology. This website uses no analytics or tracking either.</p>
 
   <h2>Children's privacy</h2>
-  <p>Xtend is a developer tool intended for users 17 and older. We do not knowingly collect data from anyone, including children.</p>
+  <p>Xtend is a developer tool intended for users 17 and older, matching its App Store age rating. We do not knowingly collect data from children.</p>
 
   <h2>Changes to this policy</h2>
-  <p>If this policy ever changes, the new version will be posted on this page with a revised effective date. Material changes affecting how data is handled will be flagged in the iOS app's release notes.</p>
+  <p>If this policy changes, the new version will be posted on this page with a revised effective date. Material changes will be flagged in the iOS app's release notes.</p>
 
   <h2>Contact</h2>
   <p>Privacy questions: <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20privacy">Maouizerat@gmail.com</a>.</p>
 
-  <p class="effective">Effective date: 2026-05-04.</p>
+  <p class="effective">Effective date: 2026-05-19.</p>
 
-  <a href="xtend-landing.html" class="back">← Back to Xtend</a>
+  <a href="index.html" class="back">← Back to Xtend</a>
 </div>
 
 <footer class="site-footer">

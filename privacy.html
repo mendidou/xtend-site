@@ -89,7 +89,7 @@
     <ul style="margin-top:10px;margin-bottom:0">
       <li>Sign in with Apple is required so the iPhone can find your Mac. We store your Apple user ID, name, and email (or hide-my-email proxy) — nothing else about you.</li>
       <li>Your simulator stream, touches, terminal data, and build commands flow directly between your iPhone and your Mac over end-to-end encrypted WebRTC (DTLS-SRTP). We never see them.</li>
-      <li>No telemetry. No analytics. No advertising. No tracking. No third-party SDKs.</li>
+      <li>Anonymous analytics and crash reporting only (Firebase Crashlytics + Mixpanel), tied to an install-only UUID — never to your Apple ID. No advertising. No cross-app tracking. No IDFA. Toggle off any time in Settings.</li>
       <li>You can delete your account from inside the app at any time.</li>
       <li>GDPR &amp; CCPA compliant.</li>
     </ul>
@@ -105,7 +105,16 @@
     <li><strong>Mac registration info</strong> — a Mac identifier (a UUID) and the Mac's display name (e.g. "Mendy's MacBook Air"), so the iPhone knows which Mac to pair with. One Mac per account.</li>
     <li><strong>IP address (transient)</strong> — your IP is visible to the signaling and TURN servers during a connection. We do not store full IPs; server logs record only a masked prefix (the first 4 IPv6 groups), retained for a short rolling window for operational diagnostics.</li>
   </ul>
-  <p>We do <strong>not</strong> collect: contacts, photos, location, device identifiers (IDFA / IDFV), keystrokes, terminal output, simulator frames, browsing history, or analytics events. The signaling server never sees the contents of your WebRTC session — that traffic is end-to-end encrypted.</p>
+  <p>We do <strong>not</strong> collect: contacts, photos, location, advertising identifiers (IDFA), keystrokes, terminal output, simulator frames, or browsing history. The signaling server never sees the contents of your WebRTC session — that traffic is end-to-end encrypted.</p>
+
+  <h2>Anonymous analytics and crash reporting</h2>
+  <p>To fix bugs and understand which features people use, Xtend sends anonymous diagnostic and usage events to two third-party services. Both are tied to an <strong>install-scoped UUID</strong> we generate on first launch and store in the app's local preferences — never to your Apple ID, email, name, or any identifier that follows you across apps. Reinstalling the app resets the UUID.</p>
+  <ul>
+    <li><strong>Firebase Crashlytics</strong> (Google) — receives unhandled exceptions, native crashes, app hangs, app version, OS version, and device model. Each report includes a short rolling log of the most recent app events leading up to the crash (e.g. "WebRTC connected via host", "paywall shown"). No personal data, no message contents, no terminal output.</li>
+    <li><strong>Mixpanel</strong> — receives anonymous product events such as "app opened", "tab changed", "build started", "paywall shown", "subscription succeeded", "Claude Remote sign-in tapped", plus periodic WebRTC quality samples (bitrate, framerate, round-trip time, packets lost, ICE path type). Used to understand feature adoption and diagnose connection quality. Events never include credentials, terminal contents, file paths, or simulator frame data.</li>
+  </ul>
+  <p>You can disable analytics at any time: <strong>Settings → Send Anonymous Analytics</strong>. When disabled, no Mixpanel events are sent and Mixpanel's SDK is opted out. Crashlytics continues to receive crash reports — those are necessary for us to identify and fix bugs and contain no personal data.</p>
+  <p>Neither service is used to track you across other companies' apps or websites. We do not pass any data we hold to advertising networks. See <a href="https://firebase.google.com/support/privacy" style="color:var(--ink)">Firebase Privacy &amp; Security</a> and <a href="https://mixpanel.com/legal/privacy-policy/" style="color:var(--ink)">Mixpanel's Privacy Policy</a> for their own handling commitments.</p>
 
   <h2>How Xtend connects your iPhone and your Mac</h2>
   <p>Xtend establishes a direct peer-to-peer WebRTC connection between your devices. There are two reachability scenarios:</p>
@@ -133,8 +142,10 @@
     <li><strong>Apple StoreKit / App Store</strong> — handles subscription billing.</li>
     <li><strong>Fly.io</strong> — hosts our signaling server (matches your iPhone with your Mac and shuttles WebRTC handshake messages between them). Logs include masked IPs and operational metadata only; never WebRTC payload.</li>
     <li><strong>Cloudflare</strong> — provides the TURN relay used as a fallback for WebRTC when direct P2P is not possible. Relay packets are encrypted with DTLS-SRTP — Cloudflare cannot decrypt them.</li>
+    <li><strong>Firebase Crashlytics</strong> (Google) — anonymous crash reports, hangs, and diagnostics tied to an install UUID. See the "Anonymous analytics and crash reporting" section above.</li>
+    <li><strong>Mixpanel</strong> — anonymous product analytics tied to an install UUID. Opt-out via Settings → Send Anonymous Analytics.</li>
   </ul>
-  <p>No analytics SDKs. No crash reporting services. No advertising networks. No social-login providers other than Apple.</p>
+  <p>No advertising networks. No social-login providers other than Apple. No IDFA.</p>
 
   <h2>Data retention &amp; deletion</h2>
   <p>Account records (Apple user ID, name, email, Mac registration) are retained for as long as your Xtend account exists. WebRTC media and terminal traffic is never stored — it flows live between your devices and is gone when the connection closes.</p>

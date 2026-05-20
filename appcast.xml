@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" xmlns:dc="http://purl.org/dc/elements/1.1/">
+    <channel>
+        <title>Xtend Host</title>
+        <link>https://getxtend.com/appcast.xml</link>
+        <description>Most recent Xtend Host updates.</description>
+        <language>en</language>
+        <!--
+        Per release, prepend a new <item>:
+
+        <item>
+            <title>Version 1.0.1</title>
+            <pubDate>Wed, 21 May 2026 10:00:00 +0000</pubDate>
+            <sparkle:version>101</sparkle:version>
+            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>Bug fixes and improvements</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.1.dmg"
+                sparkle:edSignature="SIGNATURE_FROM_sign_update"
+                length="BYTES_SIZE_OF_DMG"
+                type="application/octet-stream"/>
+        </item>
+        -->
+    </channel>
+</rss>

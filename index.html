@@ -1100,12 +1100,12 @@
       </p>
 
       <div class="cta-row">
-        <a href="#download" class="btn btn-primary">
-          Get notified
-          <span class="arrow">→</span>
+        <a href="/downloads/Xtend-Host.dmg" class="btn btn-primary">
+          Download for Mac
+          <span class="arrow">↓</span>
         </a>
-        <a href="#features" class="btn btn-ghost">
-          See what it does
+        <a href="#download" class="btn btn-ghost">
+          iPhone — get notified
         </a>
       </div>
 
@@ -1291,46 +1291,21 @@
 
     <div class="roadmap-grid">
       <div class="roadmap-col roadmap-shipped">
-        <div class="roadmap-status">✓ Shipped</div>
+        <div class="roadmap-status">✓ Available</div>
         <ul>
-          <li>Live simulator stream over LAN (20 fps)</li>
-          <li>Bidirectional touch from iPhone to simulator</li>
-          <li>Build &amp; Run via <code>xcodebuild</code></li>
-          <li>Live build logs &amp; issue counts</li>
-          <li>Terminal sessions (zsh / bash / fish)</li>
-          <li>Persistent PTY — sessions survive app close</li>
-          <li>Terminal-done notifications (prompt detection)</li>
-          <li>File browser + "Open Terminal Here"</li>
-          <li>Bonjour zero-config discovery</li>
-          <li>Sign in with Apple — single-account pairing</li>
-          <li>Remote tier — encrypted WebRTC + TURN fallback</li>
-          <li>Premium subscription via App Store ($4.99/mo, 1-week trial)</li>
-          <li>In-app account deletion</li>
-          <li>iOS light / dark mode</li>
-          <li>Xtend design system (glass cards, grid, custom fonts)</li>
-          <li>Native Mac &amp; iOS onboarding</li>
-        </ul>
-      </div>
-
-      <div class="roadmap-col roadmap-progress">
-        <div class="roadmap-status">→ Next</div>
-        <ul>
-          <li>App Store submission &amp; public release</li>
-          <li>Hardened build-cancel flow</li>
-          <li>Mac-unreachable / retry UX polish</li>
-          <li>Logs export for support</li>
-          <li>Auto-launch on Mac login</li>
-          <li>Sparkle-style updater for the Mac app</li>
+          <li>Mirror your simulator to iPhone</li>
+          <li>Run builds and watch live logs</li>
+          <li>Terminal sessions from your phone</li>
+          <li>Cellular &amp; remote mirroring (Premium)</li>
         </ul>
       </div>
 
       <div class="roadmap-col roadmap-future">
-        <div class="roadmap-status">◌ Later</div>
+        <div class="roadmap-status">◌ Coming</div>
         <ul>
           <li>Multiple Macs per account</li>
-          <li>Session recordings (limited retention)</li>
-          <li>Team / org accounts</li>
-          <li>Priority support tier</li>
+          <li>Session recordings</li>
+          <li>Team accounts</li>
         </ul>
       </div>
     </div>
@@ -1390,13 +1365,6 @@
     <p style="margin-top:24px;font-size:11px;color:var(--ink-mute)">
       No newsletter. No marketing. One email when Xtend ships.
     </p>
-    <div style="margin-top:32px;display:inline-flex;flex-direction:column;align-items:center;gap:8px;padding:16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:14px">
-      <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fgetxtend.com&margin=0"
-           alt="Scan to open Xtend on iPhone" width="160" height="160"
-           style="display:block;border-radius:8px;background:#fff;padding:8px"
-           loading="lazy">
-      <span style="font-size:12px;color:var(--ink-mute)">Scan to open on iPhone</span>
-    </div>
   </div>
 </section>
 
@@ -1497,6 +1465,24 @@
       };
       if (mq.addEventListener) mq.addEventListener('change', listener);
       else if (mq.addListener) mq.addListener(listener);
+    }
+  })();
+</script>
+
+<!-- Floating QR (desktop only) -->
+<div id="floating-qr" style="position:fixed;right:20px;bottom:20px;z-index:1000;display:none;flex-direction:column;align-items:center;gap:6px;padding:14px;background:rgba(20,20,22,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.4)">
+  <button onclick="document.getElementById('floating-qr').style.display='none';try{localStorage.setItem('qrDismissed','1')}catch(e){}" aria-label="Dismiss" style="position:absolute;top:6px;right:6px;width:18px;height:18px;border:0;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px;line-height:1;padding:0">×</button>
+  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fgetxtend.com&margin=0"
+       alt="Scan to install Xtend on iPhone" width="120" height="120"
+       style="display:block;border-radius:6px;background:#fff;padding:6px" loading="lazy">
+  <span style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500">Install on iPhone</span>
+</div>
+<script>
+  (function() {
+    var dismissed = false;
+    try { dismissed = localStorage.getItem('qrDismissed') === '1'; } catch(e){}
+    if (!dismissed && window.matchMedia('(min-width: 900px)').matches) {
+      document.getElementById('floating-qr').style.display = 'flex';
     }
   })();
 </script>

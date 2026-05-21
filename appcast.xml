@@ -43,5 +43,22 @@
                 length="22506875"
                 type="application/octet-stream"/>
         </item>
+            <item>
+            <title>Version 1.0.1</title>
+            <pubDate>Thu, 21 May 2026 12:25:23 +0000</pubDate>
+            <sparkle:version>2</sparkle:version>
+            <sparkle:shortVersionString>1.0.1</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>Drag-to-Applications install UX</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.1.dmg"
+                sparkle:edSignature="e2D+fEyfGp8thHoX7GJACfZzgrwLu4WgjkC0da1/xpVQn8ZCNGJW6oBZr+NDR1Ti6SNpgR4OXkqTEJx+tILlAg=="
+                length="22503443"
+                type="application/octet-stream"/>
+        </item>
     </channel>
 </rss>

@@ -1062,7 +1062,7 @@
       <a href="#pricing">pricing</a>
       <a href="#roadmap">roadmap</a>
       <a href="#faq">faq</a>
-      <a href="#download" class="nav-cta">get notified →</a>
+      <a href="https://testflight.apple.com/join/MRhwD9xb" target="_blank" rel="noopener" class="nav-cta">Join Beta →</a>
     </div>
   </div>
 </nav>
@@ -1343,17 +1343,17 @@
 
 <section id="download">
   <div class="container" style="text-align:center; max-width:680px">
-    <div class="section-label" style="justify-content:center">Get notified</div>
-    <h2 style="margin-left:auto;margin-right:auto">Be the first to <em>know</em>.</h2>
+    <div class="section-label" style="justify-content:center">TestFlight Beta</div>
+    <h2 style="margin-left:auto;margin-right:auto">Try Xtend <em>now</em>.</h2>
     <p class="section-sub" style="margin-left:auto;margin-right:auto">
-      Xtend is in early development. Drop your email and you'll get a single message the moment the first build is ready — nothing else, no list.
+      Xtend is in public beta. Install via TestFlight on your iPhone, pair with your Mac, and start mirroring in under a minute.
     </p>
     <div class="cta-row" style="justify-content:center">
-      <a href="https://forms.gle/zgrLMesJmEL1cgaq9" target="_blank" rel="noopener" class="btn btn-primary">Get notified <span class="arrow">→</span></a>
-      <a href="mailto:Maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20notify%20me&body=Hi%20Mendy%2C%0A%0APlease%20let%20me%20know%20when%20Xtend%20is%20ready%20to%20try.%0A%0AThanks%21" class="btn btn-ghost">Or email me directly</a>
+      <a href="https://testflight.apple.com/join/MRhwD9xb" target="_blank" rel="noopener" class="btn btn-primary">Join TestFlight <span class="arrow">→</span></a>
+      <a href="/downloads/Xtend-Host.dmg" class="btn btn-ghost">Download Mac companion</a>
     </div>
     <p style="margin-top:24px;font-size:11px;color:var(--ink-mute)">
-      No newsletter. No marketing. One email when Xtend ships.
+      iOS 18.2+ required. Mac companion needed for pairing — free download.
     </p>
   </div>
 </section>
@@ -1381,7 +1381,7 @@
         <h4>Product</h4>
         <a href="#features">Features</a>
         <a href="#pricing">Pricing</a>
-        <a href="#download">Get notified</a>
+        <a href="https://testflight.apple.com/join/MRhwD9xb" target="_blank" rel="noopener">Join Beta</a>
         <a href="#">Changelog</a>
       </div>
       <div class="foot-col">
@@ -1473,10 +1473,12 @@
 <!-- Floating QR (desktop only) -->
 <div id="floating-qr" style="position:fixed;right:20px;bottom:20px;z-index:1000;display:none;flex-direction:column;align-items:center;gap:6px;padding:14px;background:rgba(20,20,22,0.92);border:1px solid rgba(255,255,255,0.08);border-radius:14px;backdrop-filter:blur(10px);box-shadow:0 8px 32px rgba(0,0,0,0.4)">
   <button onclick="document.getElementById('floating-qr').style.display='none';try{localStorage.setItem('qrDismissed','1')}catch(e){}" aria-label="Dismiss" style="position:absolute;top:6px;right:6px;width:18px;height:18px;border:0;background:transparent;color:rgba(255,255,255,0.5);cursor:pointer;font-size:14px;line-height:1;padding:0">×</button>
-  <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Fgetxtend.com&margin=0"
-       alt="Scan to install Xtend on iPhone" width="120" height="120"
-       style="display:block;border-radius:6px;background:#fff;padding:6px" loading="lazy">
-  <span style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500">Install on iPhone</span>
+  <a href="https://testflight.apple.com/join/MRhwD9xb" target="_blank" rel="noopener" style="display:flex;flex-direction:column;align-items:center;gap:6px;text-decoration:none">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https%3A%2F%2Ftestflight.apple.com%2Fjoin%2FMRhwD9xb&margin=0"
+         alt="Scan to join TestFlight beta" width="120" height="120"
+         style="display:block;border-radius:6px;background:#fff;padding:6px" loading="lazy">
+    <span style="font-size:11px;color:rgba(255,255,255,0.65);font-weight:500">Join TestFlight Beta</span>
+  </a>
 </div>
 <script>
   (function() {

@@ -60,5 +60,22 @@
                 length="22503443"
                 type="application/octet-stream"/>
         </item>
+            <item>
+            <title>Version 1.0.2</title>
+            <pubDate>Mon, 03 Aug 2026 14:20:55 +0000</pubDate>
+            <sparkle:version>3</sparkle:version>
+            <sparkle:shortVersionString>1.0.2</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>Stop keeps the session alive; per-project Run configuration; faster chat opening; swipe-to-dismiss status pills; terminal reliability fixes</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.2.dmg"
+                sparkle:edSignature="zhnduwMQLvU5yabakRBVGq3cLlfLLvZSgq5XIi/wc+G9Mg/fxNsOYfl4UQlWpWBjlhzS1rqMJUAmqA3yrhD0Bw=="
+                length="23006000"
+                type="application/octet-stream"/>
+        </item>
     </channel>
 </rss>

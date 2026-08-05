@@ -848,7 +848,20 @@
   </div>
 </section>
 
-<section class="tint" id="setup">
+<section class="tint ipad-band" id="ipad">
+  <div class="wrap">
+    <div class="sec-head rv" style="margin-bottom:0">
+      <span class="mono">iPad</span>
+      <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
+      <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
+    </div>
+    <div class="ipad-shot rv d1" id="ipadShot">
+      <img src="ipad-shakuro.webp" alt="Xtend on iPad Pro — projects, Claude Code session and live Simulator in three columns" style="display:block;width:100%;height:100%;object-fit:cover" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<section id="setup">
   <div class="wrap">
     <div class="sec-head rv">
       <span class="mono">Setup</span>
@@ -874,7 +887,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section class="tint" id="privacy">
   <div class="wrap trust">
     <div class="rv">
       <span class="mono" style="display:block;margin-bottom:22px">Privacy</span>
@@ -893,19 +906,6 @@
       </div>
       <div class="netgap"></div>
       <span class="node off">signaling server — handshake only</span>
-    </div>
-  </div>
-</section>
-
-<section class="tint ipad-band" id="ipad">
-  <div class="wrap">
-    <div class="sec-head rv" style="margin-bottom:0">
-      <span class="mono">iPad</span>
-      <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
-      <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
-    </div>
-    <div class="ipad-shot rv d1" id="ipadShot">
-      <img src="ipad-shakuro.webp" alt="Xtend on iPad Pro — projects, Claude Code session and live Simulator in three columns" style="display:block;width:100%;height:100%;object-fit:cover" loading="lazy" />
     </div>
   </div>
 </section>
@@ -1115,6 +1115,17 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
         if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
       });
     }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+    /* The -12% margin and 15% threshold assume there is always page below the
+       element left to scroll through. The footer has none: its rows can never
+       rise more than their own height above the bottom edge, so on a window
+       taller than ~820px the trigger line sat below what max scroll can reach
+       and the bar never revealed — on shorter windows, only at the very last
+       pixels. At the end of the document the first visible pixel is the cue. */
+    var endIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); endIO.unobserve(en.target); }
+      });
+    }, { threshold: 0 });
     /* Anything already on screen is revealed at once rather than waiting for
        an observer tick. Above-the-fold content should not need a scroll to
        exist — and the hero stage in particular sat at opacity 0, which is
@@ -1123,7 +1134,7 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
     for (var j = 0; j < rv.length; j++) {
       var box = rv[j].getBoundingClientRect();
       if (box.top < window.innerHeight && box.bottom > 0) rv[j].classList.add('in');
-      else io.observe(rv[j]);
+      else (rv[j].closest('footer') ? endIO : io).observe(rv[j]);
     }
   }
 

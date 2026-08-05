@@ -608,6 +608,13 @@
       background: var(--accent); transform: scaleY(0); transform-origin: top;
     }
     .cap-progress > .mono { font-size: 10px; color: var(--text-2); }
+    /* The panel row is a hard text budget: the caps are absolutely stacked, so
+       anything taller than this row keeps rendering — straight under the phone
+       pinned below. 296px is the tallest cap (01, the longest paragraph) at
+       the narrowest common phone (331px of text at 15px/1.6, h3 at its 24px
+       clamp floor), measured. Copy edits to the caps must re-check it; the
+       three constants below move together (row = panel height; phone top =
+       76 nav + row + 12 gap; phone width offset = phone top + 36). */
     #capTrack { position: relative; height: 320vh; display: grid; grid-template-rows: 248px 1fr; }
     #capPanel {
       order: 1; position: sticky; top: 76px; height: 248px; z-index: 3;
@@ -815,7 +822,7 @@
         <article class="cap rv" data-cap="0">
           <span class="mono num">01 — Agent sessions</span>
           <h3>Claude Code and Codex, on your real projects.</h3>
-          <p>Start a session against any folder on your Mac. The answer streams in as it's written, anything the agent wants to run comes to your phone for approval — under the same permission rules you already use in Terminal — and you see the diffs, the cost and the context window fill up. Your own CLIs, your own subscription — Xtend never proxies your prompts.</p>
+          <p>Start a session against any folder on your Mac. The answer streams in as it's written, and anything it wants to run needs your approval first. Your own CLIs, your own subscription.</p>
           <p class="mono tech">Model, permission mode and reasoning effort switch mid-conversation · <code>/</code> commands and <code>@</code> mentions</p>
         </article>
 
@@ -848,7 +855,20 @@
   </div>
 </section>
 
-<section class="tint" id="setup">
+<section class="tint ipad-band" id="ipad">
+  <div class="wrap">
+    <div class="sec-head rv" style="margin-bottom:0">
+      <span class="mono">iPad</span>
+      <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
+      <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
+    </div>
+    <div class="ipad-shot rv d1" id="ipadShot">
+      <img src="ipad-shakuro.webp" alt="Xtend on iPad Pro — projects, Claude Code session and live Simulator in three columns" style="display:block;width:100%;height:100%;object-fit:cover" loading="lazy" />
+    </div>
+  </div>
+</section>
+
+<section id="setup">
   <div class="wrap">
     <div class="sec-head rv">
       <span class="mono">Setup</span>
@@ -874,7 +894,7 @@
   </div>
 </section>
 
-<section id="privacy">
+<section class="tint" id="privacy">
   <div class="wrap trust">
     <div class="rv">
       <span class="mono" style="display:block;margin-bottom:22px">Privacy</span>
@@ -893,19 +913,6 @@
       </div>
       <div class="netgap"></div>
       <span class="node off">signaling server — handshake only</span>
-    </div>
-  </div>
-</section>
-
-<section class="tint ipad-band" id="ipad">
-  <div class="wrap">
-    <div class="sec-head rv" style="margin-bottom:0">
-      <span class="mono">iPad</span>
-      <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
-      <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
-    </div>
-    <div class="ipad-shot rv d1" id="ipadShot">
-      <img src="ipad-shakuro.webp" alt="Xtend on iPad Pro — projects, Claude Code session and live Simulator in three columns" style="display:block;width:100%;height:100%;object-fit:cover" loading="lazy" />
     </div>
   </div>
 </section>
@@ -1115,6 +1122,17 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
         if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
       });
     }, { rootMargin: '0px 0px -12% 0px', threshold: 0.15 });
+    /* The -12% margin and 15% threshold assume there is always page below the
+       element left to scroll through. The footer has none: its rows can never
+       rise more than their own height above the bottom edge, so on a window
+       taller than ~820px the trigger line sat below what max scroll can reach
+       and the bar never revealed — on shorter windows, only at the very last
+       pixels. At the end of the document the first visible pixel is the cue. */
+    var endIO = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); endIO.unobserve(en.target); }
+      });
+    }, { threshold: 0 });
     /* Anything already on screen is revealed at once rather than waiting for
        an observer tick. Above-the-fold content should not need a scroll to
        exist — and the hero stage in particular sat at opacity 0, which is
@@ -1123,7 +1141,7 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
     for (var j = 0; j < rv.length; j++) {
       var box = rv[j].getBoundingClientRect();
       if (box.top < window.innerHeight && box.bottom > 0) rv[j].classList.add('in');
-      else io.observe(rv[j]);
+      else (rv[j].closest('footer') ? endIO : io).observe(rv[j]);
     }
   }
 
@@ -1303,6 +1321,23 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
        then the element is 15% on screen and actually visible. (Fires for
        opacity and transform alike; play() on a playing element is a no-op.) */
     stage.addEventListener('transitionend', sync);
+    /* iOS Safari refuses play() for reasons we cannot observe from here — the
+       reveal's opacity, the decode not being ready, its own visibility
+       heuristics — and it reports the refusal the same way every time: a
+       rejected promise, after which nothing in this file asked again. The
+       symptom was a video that only ever started once WebKit's own `autoplay`
+       attribute got around to it, by which point scrolling had carried it off
+       screen. Rather than guess which precondition is missing, ask again a few
+       times while the stage is still on screen: play() on a playing element is
+       a no-op, so the loop costs nothing once it takes. */
+    var tries = 0;
+    var retry = setInterval(function () {
+      if (!onScreen || !video.paused || ++tries > 12) {
+        if (!video.paused || tries > 12) clearInterval(retry);
+        return;
+      }
+      sync();
+    }, 250);
     stage.appendChild(video);
 
     /* No `video.paused` guard on purpose. A first version had one, and it made

@@ -594,14 +594,20 @@
       position: absolute; right: -30px; top: 50%; transform: translateY(-50%); z-index: 4;
     }
     .cap-progress .rail {
-      display: block; width: 2px; height: 72px; border-radius: 1px;
+      display: block; width: 3px; height: 92px; border-radius: 1.5px;
       background: var(--hair-strong); overflow: hidden;
+    }
+    /* A hairline at 10% alpha disappears against the page background — the
+       rail is the only hint that this band scrolls, so the track borrows the
+       muted text tone at less than half strength: present, not decorative. */
+    @supports (background: color-mix(in srgb, red 50%, transparent)) {
+      .cap-progress .rail { background: color-mix(in srgb, var(--text-3) 40%, transparent); }
     }
     .cap-progress .rail i {
       display: block; width: 100%; height: 100%;
       background: var(--accent); transform: scaleY(0); transform-origin: top;
     }
-    .cap-progress > .mono { font-size: 10px; color: var(--text-3); }
+    .cap-progress > .mono { font-size: 10px; color: var(--text-2); }
     #capTrack { position: relative; height: 320vh; display: grid; grid-template-rows: 248px 1fr; }
     #capPanel {
       order: 1; position: sticky; top: 76px; height: 248px; z-index: 3;
@@ -1287,6 +1293,16 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
        once the element says it can play. */
     video.addEventListener('loadedmetadata', sync);
     video.addEventListener('canplay', sync);
+    /* Same bug the immediate-reveal pass fixed on desktop, recreated by the
+       phone layout: single-column hero puts the stage below the fold, so the
+       visibility gate (first pixel, threshold 0) asks for play() while the
+       reveal still holds the stage at opacity 0 — and iOS Safari declines to
+       start a video it cannot see. Nothing used to ask again; WebKit's armed
+       `autoplay` attribute eventually started it on its own, long after the
+       stage was scrolling out. Retry when the reveal transition lands — by
+       then the element is 15% on screen and actually visible. (Fires for
+       opacity and transform alike; play() on a playing element is a no-op.) */
+    stage.addEventListener('transitionend', sync);
     stage.appendChild(video);
 
     /* No `video.paused` guard on purpose. A first version had one, and it made

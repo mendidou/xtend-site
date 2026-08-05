@@ -44,15 +44,16 @@
   <p class="lede">Xtend is built and maintained by one person. Reach out directly — most questions are answered within a day or two.</p>
 
   <div class="cta-row">
-    <a href="mailto:support@getxtend.com?subject=Xtend%20%E2%80%94%20support" class="btn btn-primary">Email support</a>
+    <a href="mailto:maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20support" class="btn btn-primary">Email support</a>
     <a href="index.html#faq" class="btn btn-ghost">Read the FAQ</a>
   </div>
 
   <h2>Common topics</h2>
   <ul>
-    <li><strong>Setup &amp; pairing</strong> — sign in with the same Apple ID on both your iPhone and your Mac. The iPhone automatically discovers and pairs with the Mac registered under your account. Bonjour handles same-Wi-Fi discovery; off your network the apps connect over the internet on both tiers — remote access is not the paid feature.</li>
+    <li><strong>Setup &amp; pairing</strong> — sign in with the same Apple ID on both your iPhone and your Mac. The iPhone finds the Mac registered under your account, so pairing works the same on your Wi-Fi and off it — remote access is not the paid feature. On the same Wi-Fi the two connect directly to each other whenever they can.</li>
     <li><strong>Account &amp; device security</strong> — every signaling and TURN request is authenticated with a Sign-in-with-Apple-backed session token. Only the device signed in to your Apple ID can join your session. WebRTC media is end-to-end encrypted (DTLS-SRTP); even the TURN relay sees encrypted bytes only.</li>
     <li><strong>Mac permission prompts</strong> — Screen Recording and Accessibility are required for the Mac companion to capture the simulator and forward touch events.</li>
+    <li><strong>Command approvals</strong> — Xtend does not decide what your agent is allowed to run. Your agent's own permission rules do, reading the same <code>~/.claude/settings.json</code> you already use, so a command behaves on the phone exactly as it would in Terminal on that Mac. Anything not already allowed comes to your phone as an approval; when you allow it there, the decision is written to the project's <code>.claude/settings.local.json</code>, so it applies at your desk too. If you are approving more than you expect, check that file and your global settings.</li>
     <li><strong>Connection drops</strong> — most often caused by Wi-Fi roaming or VPNs. The app retries automatically.</li>
     <li><strong>Build / scheme detection</strong> — the Mac runs <code>xcodebuild -list</code> on your <code>.xcodeproj</code>; if no schemes appear, open the project in Xcode at least once first.</li>
     <li><strong>Terminal session issues</strong> — sessions live as long as the Mac companion is running; quitting the menu-bar app ends them.</li>

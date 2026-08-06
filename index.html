@@ -284,7 +284,24 @@
        pushes the proof video off the first screen, which is the one thing
        the hero exists to show. 12px of air, no more. */
     header.hero { padding: 88px 0 64px; }
-    section { padding: 80px 0; }
+    /* Desktop air read as a void on a phone: the section rhythm, the gap
+       under every section head and the iPad shot's own top margin all shrink
+       together, so the page keeps its proportions instead of just losing
+       padding in one place. */
+    section { padding: 56px 0; }
+    .sec-head { margin-bottom: 40px; }
+    .ipad-shot { margin-top: 32px; }
+  }
+  /* Phones only: the desktop type floors (h1 40 / h2 34) leave ~11 characters
+     per line on a 390px screen, so every headline breaks mid-thought and eats
+     a third of the first screen. Smaller floors plus balanced wrapping —
+     `text-wrap: balance` evens the lines instead of leaving a one-word last
+     line (ignored by browsers that don't have it, which just wrap as before). */
+  @media (max-width: 600px) {
+    h1 { font-size: clamp(30px, 8.4vw, 40px); }
+    h2 { font-size: clamp(26px, 7.2vw, 34px); }
+    h3 { font-size: clamp(20px, 5.4vw, 24px); }
+    h1, h2, h3 { text-wrap: balance; }
   }
 
   /* ===== capabilities ===== */
@@ -443,6 +460,20 @@
   .ipad-shot { margin-top: 56px; aspect-ratio: 16 / 10.4; border-radius: 16px; overflow: hidden; border: 0.5px solid var(--hair); }
   .ipad-shot .ph { border: 0; border-radius: 0; height: 100%; }
   .ipad-band { overflow: hidden; }
+
+  /* .sec-head.split — headline and lede share a row on desktop instead of
+     stacking, which buys back most of a screen of height in bands whose
+     real content is below. Bottom-aligned so the two blocks end together.
+     Mobile keeps the stack: two columns of three words is worse. */
+  @media (min-width: 941px) {
+    .sec-head.split {
+      max-width: none; display: grid; grid-template-columns: 1.35fr 1fr;
+      gap: 0 64px; align-items: end;
+    }
+    .sec-head.split .mono { grid-column: 1 / -1; }
+    .sec-head.split h2 { max-width: 18ch; }
+    .sec-head.split p { margin-top: 0; max-width: 32em; }
+  }
 
   /* ===== pricing ===== */
   .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 0.5px solid var(--hair); }
@@ -617,7 +648,7 @@
 
 <section class="tint ipad-band" id="ipad">
   <div class="wrap">
-    <div class="sec-head rv" style="margin-bottom:0">
+    <div class="sec-head split rv" style="margin-bottom:0">
       <span class="mono">iPad</span>
       <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
       <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
@@ -679,7 +710,7 @@
 
 <section id="pricing">
   <div class="wrap">
-    <div class="sec-head rv">
+    <div class="sec-head split rv">
       <span class="mono">Pricing</span>
       <h2>Free every day. Paid when you want more of it.</h2>
       <p class="lede">Chat, terminal and builds are unlimited on the free tier — always, on any network. What the free tier meters is the expensive part: streaming the Simulator, installing to your iPhone, and uploading files. Those reset every day.</p>

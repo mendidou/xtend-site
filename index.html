@@ -18,7 +18,7 @@
 <meta name="twitter:description" content="Claude Code and Codex sessions, a real terminal, a touchable iOS Simulator and Xcode builds — from your iPhone.">
 <meta name="twitter:image" content="https://getxtend.com/xtend-og.png">
 
-<link rel="icon" type="image/svg+xml" href="app-icon.png">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <style>/* cyrillic-ext */
 /* cyrillic */
 /* vietnamese */
@@ -238,7 +238,7 @@
   .hero-top h1 { max-width: 15ch; font-weight: 500; letter-spacing: -0.035em; }
   .hero-aside { padding-top: 8px; max-width: 30em; }
   .hero-aside .ctas { margin-top: 26px; }
-  @media (max-width: 900px) { .hero-top { grid-template-columns: 1fr; gap: 34px; margin-bottom: 40px; } .hero-top h1 { max-width: none; } }
+  @media (max-width: 900px) { .hero-top { grid-template-columns: 1fr; gap: 12px; margin-bottom: 40px; } .hero-top h1 { max-width: none; } }
   .hero-foot { display: grid; grid-template-columns: 1.15fr 1fr; gap: 56px; align-items: start; margin-top: 34px; }
   @media (max-width: 900px) { .hero-foot { grid-template-columns: 1fr; gap: 34px; } }
   h1 { font-size: clamp(40px, 5.4vw, 76px); }
@@ -290,13 +290,35 @@
   .beats > *:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
   .beats b { color: var(--accent); font-weight: 500; }
   @media (max-width: 720px) { .beats { grid-template-columns: 1fr; gap: 0; } .beats > * { padding: 14px 0; } }
+  /* Phone: the four chapters cost ~210px stacked, for a list nobody reads
+     twice. They become four ticks that fill as the video passes them, plus
+     one live caption — the chapter playing right now. The labels stay inside
+     the buttons (indented off-screen) so they remain the accessible name and
+     the tap target still seeks. */
+  .beat-live { display: none; }
+  @media (max-width: 940px) {
+    .beats { grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 18px; }
+    .beats > * {
+      padding: 0; height: 3px; border: 0; border-radius: 2px; opacity: 1;
+      background: var(--hair-strong); overflow: hidden;
+      text-indent: -9999px; white-space: nowrap;
+      transition: background-color .3s ease;
+    }
+    .beats > *.done { background: color-mix(in srgb, var(--accent) 45%, transparent); }
+    .beats > *.on { background: var(--accent); }
+    .beat-live {
+      display: block; margin-top: 10px; min-height: 1.3em;
+      font-size: 12px; color: var(--text-2); transition: opacity .18s ease;
+    }
+    .beat-live b { color: var(--accent); font-weight: 500; }
+  }
   /* Narrow windows: the 104+130px hero/section rhythm reads as a void —
      tighten it below the tablet breakpoint, desktop keeps its air. */
   @media (max-width: 940px) {
-    /* Top pad is only there to clear the fixed nav (76px) — anything more
-       pushes the proof video off the first screen, which is the one thing
-       the hero exists to show. 12px of air, no more. */
-    header.hero { padding: 88px 0 64px; }
+    /* Top pad is exactly the fixed nav's height (72px) and nothing else —
+       the nav already carries its own air, and every pixel here pushes the
+       proof video off the first screen, which is what the hero is for. */
+    header.hero { padding: 72px 0 64px; }
     /* Desktop air read as a void on a phone: the section rhythm, the gap
        under every section head and the iPad shot's own top margin all shrink
        together, so the page keeps its proportions instead of just losing
@@ -559,7 +581,7 @@
 
 <nav id="nav">
   <div class="nav-in">
-    <a href="#top" class="brand"><img src="app-icon.png" alt="">xtend</a>
+    <a href="#top" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
     <div class="nav-r">
       <a href="#capabilities" class="link">Capabilities</a>
       <a href="#pricing" class="link">Pricing</a>
@@ -592,6 +614,7 @@
       <button type="button" data-t="33"><b>00:33</b> &nbsp;Build from the sofa</button>
       <button type="button" data-t="41"><b>00:41</b> &nbsp;It pings you when it lands</button>
     </div>
+    <p class="beat-live mono rv d2" id="beatLive" aria-hidden="true"><b>00:02</b> &nbsp;Ask from your phone</p>
   </div>
 </header>
 
@@ -607,10 +630,10 @@
         <div class="caps-pin">
           <div class="pin-phone framed">
             <div class="pin-shots" id="pinShots">
-              <div class="shot on" data-shot="0"><img class="lt" src="shot-chat-light.webp" alt="Chat session — streaming answer with tools and diff"><img class="dk" src="shot-chat-dark.webp" alt=""></div>
-              <div class="shot" data-shot="1"><img class="lt" src="shot-terminal-light.webp" alt="Terminal session on the Mac"><img class="dk" src="shot-terminal-dark.webp" alt=""></div>
-              <div class="shot" data-shot="2"><img class="lt" src="shot-simulator-light.webp" alt="iOS Simulator mirrored live"><img class="dk" src="shot-simulator-dark.webp" alt=""></div>
-              <div class="shot" data-shot="3"><img class="lt" src="shot-build-light.webp" alt="Build running with live logs"><img class="dk" src="shot-build-dark.webp" alt=""></div>
+              <div class="shot on" data-shot="0"><img loading="lazy" class="lt" data-src="shot-chat-light.webp" alt="Chat session — streaming answer with tools and diff"><img loading="lazy" class="dk" data-src="shot-chat-dark.webp" alt=""></div>
+              <div class="shot" data-shot="1"><img loading="lazy" class="lt" data-src="shot-terminal-light.webp" alt="Terminal session on the Mac"><img loading="lazy" class="dk" data-src="shot-terminal-dark.webp" alt=""></div>
+              <div class="shot" data-shot="2"><img loading="lazy" class="lt" data-src="shot-simulator-light.webp" alt="iOS Simulator mirrored live"><img loading="lazy" class="dk" data-src="shot-simulator-dark.webp" alt=""></div>
+              <div class="shot" data-shot="3"><img loading="lazy" class="lt" data-src="shot-build-light.webp" alt="Build running with live logs"><img loading="lazy" class="dk" data-src="shot-build-dark.webp" alt=""></div>
             </div>
             <div class="cap-progress" id="capProgress" aria-hidden="true">
               <span class="rail"><i id="capFill"></i></span>
@@ -959,6 +982,34 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
   };
   var isMobile = function () { return window.matchMedia('(max-width: 940px)').matches; };
 
+  /* The four screenshots (light + dark) are 1.2 MB and sit two screens down,
+     yet `loading="lazy"` still fetched them during the hero — Safari's lazy
+     margin is generous — where they competed with the video for bandwidth.
+     Held in data-src and attached a viewport ahead of the band instead; the
+     hidden theme's copies attach with them, so flipping Light/Dark is
+     instant once you are there. */
+  var attachShots = function () {
+    var pend = document.querySelectorAll('#pinShots img[data-src]');
+    for (var i = 0; i < pend.length; i++) {
+      pend[i].src = pend[i].getAttribute('data-src');
+      pend[i].removeAttribute('data-src');
+    }
+  };
+  if (track && 'IntersectionObserver' in window) {
+    /* 20% of a viewport of lead, measured against the track. Anything more
+       is already intersecting at page load — the track is 320vh tall and
+       starts one short hero below the fold, so a 50% margin still caught it
+       (measured: the shots kept arriving during the hero). */
+    var shotIO = new IntersectionObserver(function (en) {
+      if (!en[0].isIntersecting) return;
+      shotIO.disconnect();
+      attachShots();
+    }, { rootMargin: '20% 0px' });
+    shotIO.observe(track);
+  } else {
+    attachShots();
+  }
+
   if (shots.length && 'IntersectionObserver' in window) {
     var capIO = new IntersectionObserver(function (entries) {
       if (isMobile()) return;
@@ -1201,10 +1252,28 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
           var p = video.play(); if (p && p.catch) p.catch(function () {});
         });
       });
+      /* On a phone the marks are ticks and the text lives in one caption, so
+         the handler also tracks which chapters are behind us — and only
+         touches the DOM when the chapter actually changes, not four times a
+         second. */
+      var live = document.getElementById('beatLive');
+      var lastCur = null, swap = 0;
       video.addEventListener('timeupdate', function () {
-        var t = video.currentTime, cur = null;
-        marks.forEach(function (b) { if (t + 0.25 >= (parseFloat(b.getAttribute('data-t')) || 0)) cur = b; });
-        marks.forEach(function (b) { b.classList.toggle('on', b === cur); });
+        var t = video.currentTime, cur = null, idx = -1;
+        marks.forEach(function (b, i) {
+          if (t + 0.25 >= (parseFloat(b.getAttribute('data-t')) || 0)) { cur = b; idx = i; }
+        });
+        if (cur === lastCur) return;
+        lastCur = cur;
+        marks.forEach(function (b, i) {
+          b.classList.toggle('on', b === cur);
+          b.classList.toggle('done', i < idx);
+        });
+        if (live && cur) {
+          live.style.opacity = '0';
+          clearTimeout(swap);
+          swap = setTimeout(function () { live.innerHTML = cur.innerHTML; live.style.opacity = '1'; }, 180);
+        }
       });
     }
   }

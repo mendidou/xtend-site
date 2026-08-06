@@ -280,7 +280,10 @@
   /* Narrow windows: the 104+130px hero/section rhythm reads as a void —
      tighten it below the tablet breakpoint, desktop keeps its air. */
   @media (max-width: 940px) {
-    header.hero { padding-bottom: 64px; }
+    /* Top pad is only there to clear the fixed nav (76px) — anything more
+       pushes the proof video off the first screen, which is the one thing
+       the hero exists to show. 12px of air, no more. */
+    header.hero { padding: 88px 0 64px; }
     section { padding: 80px 0; }
   }
 
@@ -526,7 +529,7 @@
     <div class="hero-top">
       <h1 class="rv">You touch your phone. The app moves <span class="dim">on the Mac.</span></h1>
       <div class="hero-aside rv d1">
-        <p class="lede hero-sub">Claude Code and Codex sessions, a real terminal, a touchable iOS Simulator and Xcode builds — from your iPhone. The connection is direct between your devices; your code stays on them.</p>
+        <p class="lede hero-sub">Claude Code and Codex sessions, a real terminal, a touchable iOS Simulator and Xcode builds — from your iPhone.</p>
         <div class="ctas">
           <a href="APP_STORE_URL_TODO" target="_blank" rel="noopener" class="btn btn-fill">Download on the App Store <span class="arw">→</span></a>
           <a href="/downloads/Xtend-Host.dmg" class="btn btn-line">Get the Mac companion <span class="arw">↓</span></a>

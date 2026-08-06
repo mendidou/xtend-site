@@ -1295,34 +1295,15 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
       video.src = url;
       sync();
     }
-    /* Cache-first, but never blindly. A cached copy is played immediately —
-       that is the whole point — and then checked against the server in the
-       background by content length. If the file on the server has changed, the
-       cache is refreshed for next time. Without this the cache was write-once:
-       whatever a visitor got on their first visit is what they would keep
-       seeing forever, and re-encoding the video would never reach anyone who
-       had already been here. */
-    function revalidate(cached) {
-      fetch(src, { method: 'HEAD', cache: 'no-store' }).then(function (r) {
-        var len = parseInt(r.headers.get('content-length') || '0', 10);
-        if (!len || len === cached) return;
-        caches.open(CACHE).then(function (c) {
-          c.delete(src).then(function () { c.add(src).catch(function () {}); });
-        });
-      }).catch(function () {});
-    }
-
-    if (src && 'caches' in window) {
-      caches.open(CACHE).then(function (c) { return c.match(src); }).then(function (hit) {
-        if (!hit) { setSource(src); warm(); return; }
-        return hit.blob().then(function (b) {
-          setSource(URL.createObjectURL(b));
-          revalidate(b.size);
-        });
-      }).catch(function () { setSource(src); });
-    } else {
-      setSource(src);
-    }
+    /* Always the URL, never a blob: from the Cache API. Playing a cached copy
+       through createObjectURL is where this stopped working on iPhone — the
+       first visit streamed from the URL and played, every later visit took the
+       blob path and Safari refused it, which is the documented iOS behaviour
+       for blob-sourced video. Streaming also lets iOS range-request the file
+       instead of holding all 5.5 MB in memory, and the browser's own HTTP cache
+       already makes a second visit cheap. */
+    setSource(src);
+    if (src && 'caches' in window) warm();
     /* Autoplay can also be refused before the first frame is decodable; retry
        once the element says it can play. */
     video.addEventListener('loadedmetadata', sync);

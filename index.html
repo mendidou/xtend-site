@@ -1275,6 +1275,14 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
          warm. Playback first, cache second — and a timeout so a video that
          never plays (autoplay refused outright) still gets cached for the
          next visit. */
+      /* Not on phones. Warming costs the visitor a full 5.5 MB for the sake of
+         a second visit that may never happen, and whenever it runs it competes
+         with whatever the page is doing — first with the video's own streaming,
+         then, once deferred past playback, with the visitor's scrolling. On a
+         narrow screen or with Data Saver on, the streamed copy is enough. */
+      var narrow = window.matchMedia && window.matchMedia('(max-width: 940px)').matches;
+      var save = navigator.connection && navigator.connection.saveData;
+      if (narrow || save) return;
       video.addEventListener('playing', schedule, { once: true });
       setTimeout(schedule, 20000);
     }

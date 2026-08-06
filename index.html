@@ -1235,7 +1235,14 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
     var CACHE = 'xtend-media-v1';
     var src = media.proofVideo || '';
     var video = document.createElement('video');
-    video.muted = true; video.loop = true; video.playsInline = true; video.preload = 'auto';
+    video.muted = true; video.loop = true; video.playsInline = true;
+    /* `metadata`, not `auto`: the source is attached while the page is still
+       loading, so `auto` had the browser pulling all 5.5 MB up front, in
+       competition with everything else — the page felt slow for a file the
+       visitor may never scroll to. Metadata is enough to size the element and
+       show the poster; the rest streams when playback starts, which the
+       enter-the-viewport retry below already drives. */
+    video.preload = 'metadata';
     /* `autoplay` as well as the play() calls below, and both as attribute and
        property. The attribute is what lets the browser start on its own the
        moment enough data is decodable, without waiting for our gate to run —

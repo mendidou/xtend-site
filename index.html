@@ -463,16 +463,20 @@
 
   /* .sec-head.split — headline and lede share a row on desktop instead of
      stacking, which buys back most of a screen of height in bands whose
-     real content is below. Bottom-aligned so the two blocks end together.
-     Mobile keeps the stack: two columns of three words is worse. */
+     real content is below. Top-aligned: both blocks start on the same line,
+     which reads as one row even when the headline runs three lines and the
+     lede two. Mobile keeps the stack: two columns of three words is worse. */
   @media (min-width: 941px) {
     .sec-head.split {
       max-width: none; display: grid; grid-template-columns: 1.35fr 1fr;
-      gap: 0 64px; align-items: end;
+      gap: 0 64px; align-items: start;
     }
     .sec-head.split .mono { grid-column: 1 / -1; }
     .sec-head.split h2 { max-width: 18ch; }
-    .sec-head.split p { margin-top: 0; max-width: 32em; }
+    /* The lede's cap-height sits lower than the h2's, so a flat 0 leaves it
+       looking dropped — 8px back up puts the two first lines on one optical
+       baseline at the sizes this band uses. */
+    .sec-head.split p { margin-top: -8px; max-width: 32em; }
   }
 
   /* ===== pricing ===== */

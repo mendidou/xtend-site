@@ -259,9 +259,22 @@
   .ph em { font-family: 'IBM Plex Mono', monospace; font-style: normal; font-size: 10.5px; color: var(--text-3); opacity: .6; }
 
   /* ===== sections ===== */
-  section { padding: 130px 0; }
+  section { padding: 104px 0; }
   section.tint { background: var(--surface); }
   .sec-head { max-width: 22em; margin-bottom: 64px; }
+  /* 22em is a body measure — at 60px the headline inherits it and breaks
+     every 6 words, so short titles land on three lines. Desktop gives the h2
+     its own measure in ch (its own type size, not the body's) and balances
+     the wrap: 28ch keeps a one-line title on one line and splits a two-line
+     one evenly. The lede keeps the reading measure. */
+  @media (min-width: 941px) {
+    .sec-head { max-width: none; }
+    .sec-head h2 { max-width: 28ch; }
+    .sec-head p { max-width: 30em; }
+    /* This one reads better broken at its comma than run out to 38
+       characters, so it gets a narrower measure than the shared 28ch. */
+    #capabilities .sec-head h2 { max-width: 21ch; }
+  }
   .sec-head .mono { margin-bottom: 22px; display: block; }
   .sec-head p { margin-top: 22px; }
 
@@ -294,14 +307,11 @@
   }
   /* Phones only: the desktop type floors (h1 40 / h2 34) leave ~11 characters
      per line on a 390px screen, so every headline breaks mid-thought and eats
-     a third of the first screen. Smaller floors plus balanced wrapping —
-     `text-wrap: balance` evens the lines instead of leaving a one-word last
-     line (ignored by browsers that don't have it, which just wrap as before). */
+     a third of the first screen. Balanced wrapping is already global. */
   @media (max-width: 600px) {
     h1 { font-size: clamp(30px, 8.4vw, 40px); }
     h2 { font-size: clamp(26px, 7.2vw, 34px); }
     h3 { font-size: clamp(20px, 5.4vw, 24px); }
-    h1, h2, h3 { text-wrap: balance; }
   }
 
   /* ===== capabilities ===== */

@@ -360,6 +360,19 @@
        three constants below move together (row = panel height; phone top =
        76 nav + row + 12 gap; phone width offset = phone top + 36). */
     #capTrack { position: relative; height: 320vh; display: grid; grid-template-rows: 248px 1fr; }
+    /* The band's only moving surface. Panel and phone are both pinned, so a
+       finger drag changes the text but nothing travels — hairlines that
+       belong to the page (not to the phone) slide up at exactly scroll speed
+       and answer the gesture. Absolute, so it stays out of the grid; masked
+       at both ends so the ruler has no hard start or stop; inset to the wrap
+       so it can never widen the page. Pure CSS — no listener, no JS paint. */
+    #capTrack::before {
+      content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+      background-image: radial-gradient(circle, var(--hair-strong) 0.9px, transparent 1px);
+      background-size: 26px 26px;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+    }
     #capPanel {
       order: 1; position: sticky; top: 76px; height: 248px; z-index: 3;
     }

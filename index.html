@@ -1267,8 +1267,16 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
         if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 8000 });
         else setTimeout(go, 3000);
       }
-      if (document.readyState === 'complete') schedule();
-      else window.addEventListener('load', schedule, { once: true });
+      /* Wait for playback before warming. `c.add(src)` is a full, un-ranged
+         5.5 MB GET; firing it a few seconds after load put it in direct
+         competition with the video element's own ranged streaming of the same
+         file, and on a phone the split bandwidth delayed first frame by up to
+         a minute. Second visits looked fine because the cache was already
+         warm. Playback first, cache second — and a timeout so a video that
+         never plays (autoplay refused outright) still gets cached for the
+         next visit. */
+      video.addEventListener('playing', schedule, { once: true });
+      setTimeout(schedule, 20000);
     }
 
     /* `setSource` rather than a bare assignment: the cache lookup is a promise,
@@ -1330,14 +1338,28 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
        screen. Rather than guess which precondition is missing, ask again a few
        times while the stage is still on screen: play() on a playing element is
        a no-op, so the loop costs nothing once it takes. */
-    var tries = 0;
-    var retry = setInterval(function () {
-      if (!onScreen || !video.paused || ++tries > 12) {
-        if (!video.paused || tries > 12) clearInterval(retry);
-        return;
-      }
-      sync();
-    }, 250);
+    /* iOS refuses the first play() for reasons not observable from here, and
+       reports it as a rejected promise nothing used to act on — so the video
+       only ever started when WebKit's own `autoplay` got around to it, by
+       which point scrolling had carried it off screen. Ask again for a few
+       seconds, and — this is the part a first attempt got wrong — start that
+       window when the stage ENTERS the viewport, not when the page loads: a
+       visitor reaches this section long after load, when a load-time window
+       has expired. Stop on `playing`, never on `video.paused`: play() clears
+       paused synchronously and only restores it when the promise rejects, so
+       a loop testing `paused` cancels itself on its first tick. */
+    var retry = null;
+    function retryWhileVisible() {
+      if (retry) return;
+      var tries = 0;
+      retry = setInterval(function () {
+        if (!onScreen || ++tries > 16) { clearInterval(retry); retry = null; return; }
+        sync();
+      }, 250);
+    }
+    video.addEventListener('playing', function () {
+      if (retry) { clearInterval(retry); retry = null; }
+    });
     stage.appendChild(video);
 
     /* No `video.paused` guard on purpose. A first version had one, and it made
@@ -1359,6 +1381,7 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
       new IntersectionObserver(function (es) {
         es.forEach(function (e) { onScreen = e.isIntersecting; });
         sync();
+        if (onScreen) retryWhileVisible();
         // Any visible pixel counts. A quarter-visible hero on a short window
         // would otherwise sit frozen until the visitor scrolled.
       }, { threshold: 0 }).observe(stage);

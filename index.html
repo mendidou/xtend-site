@@ -420,10 +420,19 @@
        so it can never widen the page. Pure CSS — no listener, no JS paint. */
     #capTrack::before {
       content: ''; position: absolute; inset: 0; z-index: 0; pointer-events: none;
-      background-image: radial-gradient(circle, var(--hair-strong) 0.9px, transparent 1px);
-      background-size: 26px 26px;
+      background-image: radial-gradient(circle, var(--hair-strong) 1.1px, transparent 1.2px);
+      background-size: 22px 22px;
       -webkit-mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
       mask-image: linear-gradient(to bottom, transparent 0, #000 12%, #000 86%, transparent 100%);
+    }
+    /* --hair-strong is 10-12% alpha, which reads as nothing while it moves.
+       Same tone as the progress rail, well under half strength: legible as
+       motion, still invisible as decoration behind the text. */
+    @supports (background: color-mix(in srgb, red 50%, transparent)) {
+      #capTrack::before {
+        background-image: radial-gradient(circle,
+          color-mix(in srgb, var(--text-3) 34%, transparent) 1.1px, transparent 1.2px);
+      }
     }
     #capPanel {
       order: 1; position: sticky; top: 76px; height: 248px; z-index: 3;

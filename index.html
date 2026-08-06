@@ -966,26 +966,26 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
         disconnected its observer after first load and then played to the end
         off-screen, decoding frames for nobody.
 
-     2. First visit streams behind the poster. The file carries its moov atom
-        up front, so playback starts after a few hundred KB rather than 5 MB.
+     2. Every visit streams behind the poster. The file carries its moov atom
+        up front, so playback starts after a few hundred KB rather than 5 MB,
+        and the browser's HTTP cache is what makes later visits cheap.
 
-     3. Later visits start from Cache Storage, offline included. GitHub Pages
-        owns the HTTP cache headers and we cannot set them, which is why the
-        copy is explicit rather than left to the browser's own cache. */
+     3. The source is not attached until the stage is within a viewport of
+        being seen. iOS downloads the entire file the moment a source exists,
+        whatever `preload` says (measured: 5.5 MB pulled with the element
+        paused, off-screen and preload=metadata), so the only way to not bill
+        every visitor for the video is to not give the element a URL yet. */
   var stage = document.getElementById('stage');
   if (stage && document.documentElement.hasAttribute('data-has-proof') && !reduce) {
     var media = window.__resources || {};
     var onScreen = false;
-    var CACHE = 'xtend-media-v1';
     var src = media.proofVideo || '';
     var video = document.createElement('video');
     video.muted = true; video.loop = true; video.playsInline = true;
-    /* `metadata`, not `auto`: the source is attached while the page is still
-       loading, so `auto` had the browser pulling all 5.5 MB up front, in
-       competition with everything else — the page felt slow for a file the
-       visitor may never scroll to. Metadata is enough to size the element and
-       show the poster; the rest streams when playback starts, which the
-       enter-the-viewport retry below already drives. */
+    /* iOS ignores this hint once a source is attached — it pulls the whole
+       file regardless (measured against a throttled server: 5.5 MB delivered,
+       element paused and off-screen). Kept because it is the correct hint;
+       what actually limits the download is attaching the source late, below. */
     video.preload = 'metadata';
     /* `autoplay` as well as the play() calls below, and both as attribute and
        property. The attribute is what lets the browser start on its own the
@@ -1001,60 +1001,61 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
       if (ph) ph.style.display = 'none';
     });
 
-    /* Deliberately NOT gated on the `playing` event. A first attempt was, and
-       it inverted the intent: a throttled tab or a slow connection never
-       reaches `playing`, so the visitors who would gain most from a warm cache
-       were exactly the ones who never got one. Deferred instead — after load,
-       plus idle time where the browser offers it — so the copy still yields to
-       the bytes being watched. */
-    function warm() {
-      var fired = false;
-      function go() {
-        if (fired) return;
-        fired = true;
-        caches.open(CACHE).then(function (c) { return c.add(src); }).catch(function () {});
-      }
-      function schedule() {
-        if (window.requestIdleCallback) requestIdleCallback(go, { timeout: 8000 });
-        else setTimeout(go, 3000);
-      }
-      /* Wait for playback before warming. `c.add(src)` is a full, un-ranged
-         5.5 MB GET; firing it a few seconds after load put it in direct
-         competition with the video element's own ranged streaming of the same
-         file, and on a phone the split bandwidth delayed first frame by up to
-         a minute. Second visits looked fine because the cache was already
-         warm. Playback first, cache second — and a timeout so a video that
-         never plays (autoplay refused outright) still gets cached for the
-         next visit. */
-      /* Not on phones. Warming costs the visitor a full 5.5 MB for the sake of
-         a second visit that may never happen, and whenever it runs it competes
-         with whatever the page is doing — first with the video's own streaming,
-         then, once deferred past playback, with the visitor's scrolling. On a
-         narrow screen or with Data Saver on, the streamed copy is enough. */
-      var narrow = window.matchMedia && window.matchMedia('(max-width: 940px)').matches;
-      var save = navigator.connection && navigator.connection.saveData;
-      if (narrow || save) return;
-      video.addEventListener('playing', schedule, { once: true });
-      setTimeout(schedule, 20000);
-    }
+    /* No Cache Storage warming any more. Since playback always streams from
+       the URL (a cached copy played through createObjectURL is where this
+       stopped working on iPhone — the first visit streamed and played, every
+       later visit took the blob path and Safari refused it, the documented
+       iOS behaviour for blob-sourced video), and there is no service worker,
+       nothing ever READS that cache: video elements do not consult the Cache
+       API on their own. Warming was a full, un-ranged 5.5 MB GET per desktop
+       visit that bought nothing. The browser's HTTP cache is the real one.
 
-    /* `setSource` rather than a bare assignment: the cache lookup is a promise,
-       so the source lands AFTER the first `sync()` below. Calling play() on a
-       source-less element rejects, and nothing would have retried — the video
-       simply never started. Every path that sets a source re-runs the gate. */
-    function setSource(url) {
-      video.src = url;
+       The source itself is attached only when the stage is within ~one
+       viewport of being seen. iOS starts downloading the entire file the
+       moment `src` exists, paused and off-screen and whatever `preload` says,
+       so attaching late is the only effective lid on the transfer. Everything
+       downstream re-arms itself: the assignment triggers `sync()`, and the
+       loadedmetadata/canplay listeners retry play() as data arrives. */
+    var attached = false;
+    function attachSource() {
+      if (attached || !src) return;
+      attached = true;
+      video.src = src;
       sync();
     }
-    /* Always the URL, never a blob: from the Cache API. Playing a cached copy
-       through createObjectURL is where this stopped working on iPhone — the
-       first visit streamed from the URL and played, every later visit took the
-       blob path and Safari refused it, which is the documented iOS behaviour
-       for blob-sourced video. Streaming also lets iOS range-request the file
-       instead of holding all 5.5 MB in memory, and the browser's own HTTP cache
-       already makes a second visit cheap. */
-    setSource(src);
-    if (src && 'caches' in window) warm();
+    /* The stage is hero content: on a normal entry it is on screen or one
+       scroll away, so the stream should start with the page — gating it only
+       adds a beat to first frame. The one visitor who shouldn't pay for it
+       is the one landing on a deep anchor (#pricing, #faq …). For them, wait
+       for the stage to come near — but not before the anchor jump has
+       actually happened: Safari re-anchors as images land, the viewport sits
+       at the top until then, and an observer armed during that window reads
+       the stage as near and attaches anyway (measured). A user gesture, or a
+       beat after `load`, is past the jump; the timer is a failsafe so the
+       video can never be kept from attaching entirely. */
+    var hash = location.hash;
+    var deep = !!hash && hash !== '#top' && hash !== '#stage' && hash !== '#beats' &&
+               !!document.getElementById(hash.slice(1));
+    if (deep && 'IntersectionObserver' in window) {
+      var near = new IntersectionObserver(function (es) {
+        es.forEach(function (e) {
+          if (e.isIntersecting) { near.disconnect(); attachSource(); }
+        });
+      }, { rootMargin: '100% 0px' });
+      var armed = false;
+      function arm() {
+        if (armed) return;
+        armed = true;
+        near.observe(stage);
+      }
+      ['touchstart', 'wheel', 'keydown', 'pointerdown'].forEach(function (ev) {
+        window.addEventListener(ev, arm, { once: true, passive: true });
+      });
+      window.addEventListener('load', function () { setTimeout(arm, 2500); }, { once: true });
+      setTimeout(arm, 8000);
+    } else {
+      attachSource();
+    }
     /* Autoplay can also be refused before the first frame is decodable; retry
        once the element says it can play. */
     video.addEventListener('loadedmetadata', sync);

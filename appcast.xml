@@ -77,5 +77,22 @@
                 length="23006000"
                 type="application/octet-stream"/>
         </item>
+            <item>
+            <title>Version 1.0.3</title>
+            <pubDate>Mon, 10 Aug 2026 18:15:36 +0000</pubDate>
+            <sparkle:version>4</sparkle:version>
+            <sparkle:shortVersionString>1.0.3</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>Connection reliability, permission fixes, and in-app alerts when your agent needs you.</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.3.dmg"
+                sparkle:edSignature="P68kvVFapea/FPVUko3RuZ/n3MvG6niOXq3THsVchaQteBg9hedBPJ5XwkXD9L766BfGzaL+h86BD6fL7PXnDg=="
+                length="23097020"
+                type="application/octet-stream"/>
+        </item>
     </channel>
 </rss>

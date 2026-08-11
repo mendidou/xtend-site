@@ -94,5 +94,22 @@
                 length="23097020"
                 type="application/octet-stream"/>
         </item>
+            <item>
+            <title>Version 1.0.4</title>
+            <pubDate>Tue, 11 Aug 2026 11:06:08 +0000</pubDate>
+            <sparkle:version>5</sparkle:version>
+            <sparkle:shortVersionString>1.0.4</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>The Scan-with-iPhone QR now opens the App Store listing directly.</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.4.dmg"
+                sparkle:edSignature="KifdwGmbg4AiYu2QL6o+I/+Dn0X/z+VS/DCB9lvgKQjhvau9zOCEPkJgh7hnQHthFgmLlob42J5zhUfSW+BqDw=="
+                length="23096847"
+                type="application/octet-stream"/>
+        </item>
     </channel>
 </rss>

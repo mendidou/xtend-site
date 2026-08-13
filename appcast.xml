@@ -111,5 +111,22 @@
                 length="23096847"
                 type="application/octet-stream"/>
         </item>
+            <item>
+            <title>Version 1.0.5</title>
+            <pubDate>Thu, 13 Aug 2026 21:19:04 +0000</pubDate>
+            <sparkle:version>6</sparkle:version>
+            <sparkle:shortVersionString>1.0.5</sparkle:shortVersionString>
+            <sparkle:minimumSystemVersion>15.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[
+                <ul>
+                    <li>Fixes the Sign In window not appearing, and multi-device handover: the most recent device to connect now takes over cleanly.</li>
+                </ul>
+            ]]></description>
+            <enclosure
+                url="https://getxtend.com/downloads/Xtend-Host-1.0.5.dmg"
+                sparkle:edSignature="tU+8FNOjci3FZNgmVOIUBAgJp5gp1ClLdVnjbCN+pods8OIPfol8xsMOg6Jblntp7/TjqP5EOeH4hGt3Xr4pCA=="
+                length="23134072"
+                type="application/octet-stream"/>
+        </item>
     </channel>
 </rss>

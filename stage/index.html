@@ -124,6 +124,11 @@
     --del: #B3261E;
     --nav: rgba(244,242,236,0.85);
     --ph: rgba(40,33,20,0.05);
+    /* Halo stops — warm, and barely there: 9% of the accent over the page
+       background is about a 3% luminance move. */
+    --halo-1: rgba(199,94,30,0.13);
+    --halo-2: rgba(199,94,30,0.065);
+    --nav-shadow: 0 12px 34px -22px rgba(0,0,0,0.45);
   }
   [data-theme="dark"] {
     color-scheme: dark;
@@ -141,12 +146,22 @@
     --del: #F85149;
     --nav: rgba(12,15,20,0.82);
     --ph: rgba(150,180,220,0.07);
+    /* In dark the halo has to lift, not tint: the warm stop stays, the second
+       one becomes a plain light so the top of the page opens up. */
+    --halo-1: rgba(255,138,77,0.10);
+    --halo-2: rgba(232,236,242,0.045);
+    /* A black drop shadow does nothing on a near-black page. What separates a
+       floating surface in dark is the lit top edge — an inset hairline of
+       white — with the drop shadow only deepening what sits under it. */
+    --nav-shadow: 0 16px 40px -24px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07);
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+  /* The page background lives on <html> so body's ::before can sit above it
+     and below the content — that is the halo layer. */
+  html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; background: var(--bg); }
   body {
-    background: var(--bg);
+    position: relative;
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Inter', system-ui, sans-serif;
     font-size: 17px;
@@ -157,6 +172,25 @@
   a { color: var(--accent); text-decoration: none; }
   a:hover { color: var(--text); }
   ::selection { background: var(--accent); color: var(--accent-ink); }
+
+  /* Halo — one warm light behind the hero, gone by the second section. It is
+     absolute, not fixed: it belongs to the top of the page, it doesn't follow
+     you down it. Both stops are defined per theme; a single colour would read
+     as dirt in one of the two. */
+  body::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1100px;
+    z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(1100px 620px at 50% -14%, var(--halo-1), transparent 62%),
+      radial-gradient(760px 520px at 86% 2%, var(--halo-2), transparent 68%);
+  }
+  /* Grain — at 3.5% it is invisible as texture and only does one job: break
+     the banding a gradient this soft produces on an 8-bit screen. */
+  body::after {
+    content: ''; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    opacity: 0.035; background-size: 200px 200px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
 
   .wrap { width: 100%; max-width: 1240px; margin: 0 auto; padding: 0 40px; }
   @media (max-width: 720px) { .wrap { padding: 0 22px; } }
@@ -177,23 +211,33 @@
   p { text-wrap: pretty; }
   .lede { font-size: clamp(17px, 1.35vw, 20px); color: var(--text-2); font-weight: 300; line-height: 1.55; }
 
-  /* ===== nav ===== */
+  /* ===== nav =====
+     A floating capsule rather than a full-width bar: same shape as the
+     Setup/Privacy control further down, so the page carries one form. The
+     blur moves onto the capsule itself — a full-width blurred band would
+     have kept the old bar's silhouette. */
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    position: fixed; top: 14px; left: 0; right: 0; z-index: 100;
+    background: none; border: 0;
+    transition: top .3s ease;
+  }
+  nav.stuck { top: 10px; }
+  .nav-in {
+    max-width: 1080px; margin: 0 auto; padding: 0 12px 0 20px;
+    height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 26px;
     background: var(--nav);
     backdrop-filter: saturate(180%) blur(20px);
     -webkit-backdrop-filter: saturate(180%) blur(20px);
-    border-bottom: 0.5px solid transparent;
-    transition: border-color .3s ease;
-  }
-  nav.stuck { border-bottom-color: var(--hair); }
-  .nav-in {
-    max-width: 1240px; margin: 0 auto; padding: 0 40px;
-    height: 72px; display: flex; align-items: center; justify-content: space-between;
+    border: 0.5px solid var(--hair);
+    border-radius: 999px;
+    box-shadow: var(--nav-shadow);
     transition: height .3s ease;
   }
-  nav.stuck .nav-in { height: 56px; }
-  @media (max-width: 720px) { .nav-in { padding: 0 22px; } }
+  nav.stuck .nav-in { height: 52px; }
+  @media (max-width: 720px) {
+    nav { top: 10px; }
+    .nav-in { margin: 0 14px; padding: 0 10px 0 16px; height: 52px; }
+  }
   .brand {
     display: inline-flex; align-items: center; gap: 9px;
     font-family: 'IBM Plex Mono', monospace; font-size: 15px; font-weight: 500;
@@ -203,7 +247,16 @@
   .nav-r { display: flex; align-items: center; gap: 26px; }
   .nav-r a.link { font-size: 14px; color: var(--text-2); }
   .nav-r a.link:hover { color: var(--text); }
-  @media (max-width: 780px) { .nav-r a.link { display: none; } }
+  /* Phone: the capsule keeps the two links worth reaching for and drops
+     "Capabilities", the long one — measured, the three of them plus the brand
+     and the button overflow a 360px capsule, two of them do not. Below 360
+     the FAQ goes too. There is no burger; the footer carries the full set. */
+  @media (max-width: 780px) {
+    .nav-r { gap: 16px; }
+    .nav-r a.link { font-size: 13.5px; }
+    .nav-r a.link[href="#capabilities"] { display: none; }
+  }
+  @media (max-width: 360px) { .nav-r a.link[href="#faq"] { display: none; } }
 
   .themes { display: inline-flex; gap: 2px; padding: 2px; border: 0.5px solid var(--hair); border-radius: 8px; }
   .themes button {
@@ -247,6 +300,12 @@
   h1 .dim { color: var(--text-3); }
   .hero-sub { margin: 0; }
   .ctas { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  /* On a phone the two buttons stacked at their natural widths (254 and 227)
+     read as a ragged edge under a centred block. Same width, same column. */
+  @media (max-width: 600px) {
+    .ctas { flex-direction: column; align-items: stretch; width: 100%; max-width: 320px; margin-inline: auto; }
+    .ctas .btn { width: 100%; justify-content: center; }
+  }
   .sysreq { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; }
   .sysreq .s { opacity: .4; }
 
@@ -260,8 +319,14 @@
 
   /* ===== sections ===== */
   section { padding: 104px 0; }
-  section.tint { background: var(--surface); }
-  .sec-head { max-width: 22em; margin-bottom: 64px; }
+  /* One background for the whole page. The alternating tinted bands were
+     doing the section separation; a full-bleed hairline does it without
+     painting 800px of colour, and the cards become the only raised surface. */
+  section + section, header.hero + section { border-top: 0.5px solid var(--hair); }
+  /* Section heads are centred; everything that is read in a column — the
+     table, the FAQ, the steps, the facts, the capabilities — stays left. */
+  .sec-head { max-width: 22em; margin: 0 auto 64px; text-align: center; }
+  .sec-head h2, .sec-head p { margin-left: auto; margin-right: auto; }
   /* 22em is a body measure — at 60px the headline inherits it and breaks
      every 6 words, so short titles land on three lines. Desktop gives the h2
      its own measure in ch (its own type size, not the body's) and balances
@@ -406,12 +471,12 @@
     .cap-progress > .mono { font-size: 10px; color: var(--text-2); }
     /* The panel row is a hard text budget: the caps are absolutely stacked, so
        anything taller than this row keeps rendering — straight under the phone
-       pinned below. 296px is the tallest cap (01, the longest paragraph) at
-       the narrowest common phone (331px of text at 15px/1.6, h3 at its 24px
-       clamp floor), measured. Copy edits to the caps must re-check it; the
-       three constants below move together (row = panel height; phone top =
-       76 nav + row + 12 gap; phone width offset = phone top + 36). */
-    #capTrack { position: relative; height: 320vh; display: grid; grid-template-rows: 248px 1fr; }
+       pinned below. Remeasured after the copy edits: the tallest cap is 215px
+       at 360px of screen (the narrowest common phone), so the row is 224 with
+       9px of slack, not the 248 it used to carry. Copy edits must re-check it;
+       the constants move together — phone top = 66 nav + row + 10 gap, and the
+       phone's height budget = phone top + 60. */
+    #capTrack { position: relative; height: 320vh; display: grid; grid-template-rows: 224px 1fr; }
     /* The band's only moving surface. Panel and phone are both pinned, so a
        finger drag changes the text but nothing travels — hairlines that
        belong to the page (not to the phone) slide up at exactly scroll speed
@@ -434,8 +499,10 @@
           color-mix(in srgb, var(--text-3) 34%, transparent) 1.1px, transparent 1.2px);
       }
     }
+    /* 66, not 76: the nav is a 52px capsule sitting 10px from the top now,
+       not a 72px full-width bar. */
     #capPanel {
-      order: 1; position: sticky; top: 76px; height: 248px; z-index: 3;
+      order: 1; position: sticky; top: 66px; height: 224px; z-index: 3;
     }
     #capPanel .cap {
       position: absolute; left: 0; right: 0; top: 0; padding: 0;
@@ -447,16 +514,102 @@
     #capPanel .cap .tech { display: none; }
     .caps-pin {
       order: 2; float: none; width: auto; margin: 0 auto;
-      position: sticky; top: 336px; align-self: start;
+      position: sticky; top: 300px; align-self: start;
     }
     .caps-pin::after { display: none; }
     .caps-pin > p { display: none; }
     .pin-phone {
       aspect-ratio: 9 / 19.5; height: auto;
-      width: min(78vw, calc((100dvh - 372px) * 0.462));
+      width: min(78vw, calc((100dvh - 360px) * 0.462));
       min-width: 178px; margin: 0 auto;
     }
     .cap-shot { display: none; }
+  }
+  /* The 320px-class phones are the exception: the same copy needs 239px there,
+     so they keep the old, taller row and the lower phone. Everything from 360
+     up gets the raise. */
+  @media (max-width: 344px) {
+    #capTrack { grid-template-rows: 250px 1fr; }
+    #capPanel { height: 250px; }
+    .caps-pin { top: 326px; }
+    .pin-phone { width: min(78vw, calc((100dvh - 386px) * 0.462)); }
+  }
+
+  /* ===== setup + privacy, one band =====
+     Two closing sections, one thin idea each, used to cost a screen-height
+     apiece. They share a band now and a segmented control swaps them, so the
+     page ends on one screen instead of two. The label sits left, the control
+     right — on a phone they stack and the control goes full width. */
+  .seg-head { margin-bottom: 28px; text-align: center; }
+  .seg-head .mono { margin: 0; }
+  /* The card is the window: same hairline-on-surface register as the proof
+     stage and the iPad shot, one notch rounder because it holds text. */
+  .seg-card { border: 0.5px solid var(--hair); border-radius: 18px;
+    background: var(--surface); padding: 52px; display: grid;
+    transition: height 0.35s cubic-bezier(.2,.7,.3,1); }
+  /* Both panels share one grid cell, so the card is always as tall as the
+     taller of the two and nothing jumps when you switch. The hidden one is
+     visibility:hidden, which also takes it out of the tab order and the
+     accessibility tree — display:none would collapse the height again. */
+  .seg-panel { grid-area: 1 / 1; visibility: hidden; opacity: 0;
+    transition: opacity 0.3s ease; }
+  .seg-panel.on { visibility: visible; opacity: 1; }
+  .seg-cols { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 72px; align-items: center; }
+  .seg-card h2 { font-size: clamp(24px, 3vw, 36px); max-width: 19ch; margin-bottom: 36px; }
+  .segs-row { display: flex; justify-content: center; margin-top: 28px; }
+  .segs { display: inline-flex; gap: 4px; padding: 4px; border-radius: 999px;
+    background: var(--surface-2); border: 0.5px solid var(--hair); }
+  .segs button { font: inherit; letter-spacing: inherit; text-transform: inherit;
+    color: var(--text-2); background: none; border: 0; border-radius: 999px;
+    padding: 10px 20px; cursor: pointer; white-space: nowrap;
+    transition: background-color 0.25s ease, color 0.25s ease; }
+  /* :not() matters — on the selected pill the label is already var(--bg), and
+     a plain :hover would repaint it var(--text), i.e. the pill's own colour. */
+  .segs button:not([aria-selected="true"]):hover { color: var(--text); }
+  .segs button[aria-selected="true"] { background: var(--text); color: var(--bg); }
+  .segs button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+  /* The Mac companion has no window — it is a menu-bar item — so the drawing
+     is a menu bar and its popover, at the same weight as the netviz opposite:
+     hairlines and two type sizes, nothing shaded. */
+  .mbviz { display: flex; justify-content: center; width: 100%; }
+  /* An implied Mac screen — the strip alone floated in the card and read as a
+     stray pill. The frame gives the menu bar something to be the top of. */
+  .mb-screen { position: relative; width: 100%; max-width: 330px; aspect-ratio: 16 / 11;
+    border: 0.5px solid var(--hair-strong); border-radius: 12px; background: var(--bg);
+    overflow: hidden; }
+  .mb-strip { position: absolute; inset: 0 0 auto 0; height: 27px;
+    display: flex; align-items: center; justify-content: flex-end; gap: 12px; padding: 0 12px;
+    border-bottom: 0.5px solid var(--hair-strong); background: var(--surface-2); }
+  .mb-strip img { display: block; border-radius: 3px; }
+  .mb-dot { width: 10px; height: 8px; border-radius: 2px; background: var(--hair-strong); }
+  .mb-time { font-size: 10px; color: var(--text-3); }
+  .mb-pop { position: absolute; top: 37px; right: 12px; width: 196px; padding: 13px 15px;
+    border-radius: 11px; border: 0.5px solid var(--hair-strong); background: var(--surface);
+    display: grid; gap: 8px; box-shadow: 0 14px 34px -20px rgba(0,0,0,0.55); }
+  .mb-row { display: flex; align-items: center; gap: 9px; font-size: 13px; color: var(--text); }
+  .mb-row.dim { font-size: 10px; color: var(--text-3); }
+  .mb-led { width: 7px; height: 7px; border-radius: 50%; background: var(--add); }
+
+  @media (max-width: 940px) {
+    .seg-card { padding: 32px 24px; border-radius: 16px; }
+    .seg-cols { grid-template-columns: 1fr; gap: 44px; }
+    .mb-screen, .net-frame { max-width: 320px; }
+  }
+  @media (max-width: 600px) {
+    .seg-head { margin-bottom: 20px; }
+    /* The card ran 852px on a phone. The privacy panel is the taller of the
+       two, so it sets the height: 530px of text, 214px of diagram. Everything
+       shrinks a notch instead of the drawing disappearing. */
+    .seg-card { padding: 22px 17px; }
+    .seg-card h2 { margin-bottom: 20px; font-size: 23px; }
+    .seg-cols { gap: 20px; }
+    .facts div { padding: 12px 0; font-size: 14.5px; line-height: 1.55; }
+    .steps.stack .step { padding: 13px 0; }
+    .steps.stack .step h3 { font-size: 17.5px; }
+    .steps.stack .step p { font-size: 14.5px; }
+    /* The capsule hugs its two words on a phone — stretched full width it
+       read as a pair of buttons, not one control. */
+    .segs button { padding: 9px 22px; }
   }
 
   /* ===== steps ===== */
@@ -474,6 +627,15 @@
   .in.steps .step:nth-child(2)::before { animation-delay: .1s; }
   .in.steps .step:nth-child(3)::before { animation-delay: .28s; }
   @keyframes growY { to { transform: scaleY(1); } }
+  /* Inside the card the three steps run down the left column instead of
+     across, so they take the phone treatment: hairline between, no rule. */
+  .steps.stack { grid-template-columns: 1fr; }
+  .steps.stack .step { padding: 20px 0; border-top: 0.5px solid var(--hair); }
+  .steps.stack .step:first-child { padding-top: 0; border-top: 0; }
+  .steps.stack .step:last-child { padding-bottom: 0; }
+  .steps.stack .step::before { display: none; }
+  .steps.stack .step h3 { font-size: 19px; }
+  .steps.stack .step .num { margin-bottom: 10px; }
   .step .num { display: block; margin-bottom: 16px; color: var(--accent); }
   .step h3 { font-size: 22px; letter-spacing: -0.01em; }
   .step p { margin-top: 10px; font-size: 15.5px; color: var(--text-2); }
@@ -484,71 +646,157 @@
   }
 
   /* ===== privacy diagram ===== */
-  .trust { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-  @media (max-width: 940px) { .trust { grid-template-columns: 1fr; gap: 52px; } }
   .facts { display: grid; gap: 0; }
   .facts div { padding: 20px 0; border-top: 0.5px solid var(--hair); font-size: 16px; color: var(--text-2); }
   .facts div:last-child { border-bottom: 0.5px solid var(--hair); }
   .facts b { color: var(--text); font-weight: 500; }
-  .netviz { display: grid; gap: 0; justify-items: center; }
-  .netrow { display: flex; align-items: center; gap: 0; width: 100%; max-width: 420px; }
-  .node { padding: 12px 16px; border: 0.5px solid var(--hair-strong); border-radius: 8px; white-space: nowrap; color: var(--text); }
-  .node.off { border-style: dashed; border-color: var(--hair); color: var(--text-3); }
-  .wire { flex: 1; height: 0.5px; background: var(--hair-strong); }
-  .netgap { height: 54px; width: 0.5px; background: repeating-linear-gradient(to bottom, var(--hair) 0 3px, transparent 3px 8px); margin: 8px 0; }
+  .netviz { display: flex; justify-content: center; width: 100%; }
+  /* Same frame and proportion as the menu-bar drawing on the Setup tab, so
+     the two panels weigh the same and the card doesn't lurch when you switch. */
+  .net-frame { position: relative; width: 100%; max-width: 330px; aspect-ratio: 16 / 11;
+    border: 0.5px solid var(--hair-strong); border-radius: 12px; background: var(--bg);
+    padding: 0 28px; display: grid; align-content: center; justify-items: center; }
+  .wire-label { font-size: 10px; color: var(--text-3); margin-bottom: 14px; }
+  .netrow { display: flex; align-items: center; gap: 0; width: 100%; }
+  /* The two ends are drawn, not labelled — a box saying "iPhone" carried no
+     more information than the word and read as a diagram of nothing. */
+  .dev { position: relative; border: 0.5px solid var(--hair-strong); background: var(--surface-2); flex: none; }
+  .dev.phone { width: 38px; height: 66px; border-radius: 8px; }
+  .dev.phone i { position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
+    width: 13px; height: 3px; border-radius: 2px; background: var(--hair-strong); }
+  .dev.mac { width: 82px; height: 52px; border-radius: 6px; }
+  .dev.mac i { position: absolute; left: -10px; right: -10px; bottom: -6px; height: 5px;
+    border: 0.5px solid var(--hair-strong); border-radius: 0 0 5px 5px; background: var(--surface-2); }
+  .net-legend { display: flex; justify-content: space-between; width: 100%;
+    margin-top: 14px; font-size: 10px; color: var(--text-3); }
+  /* max-width is the guard: the frame shrinks with the viewport, a nowrap
+     node does not, and it used to walk straight out through the border. */
+  .node { padding: 9px 12px; font-size: 11px; border: 0.5px solid var(--hair-strong);
+    border-radius: 8px; white-space: nowrap; max-width: 100%; color: var(--text);
+    background: var(--surface); }
+  .node.off { border-style: dashed; border-color: var(--hair-strong); color: var(--text-3); background: none; }
+  .wire { flex: 1; height: 0.5px; background: var(--hair-strong); position: relative; }
+  /* One packet crossing the wire — the only motion in the card, and the whole
+     point of the panel: the media goes device to device, not through us. */
+  .wire::after { content: ''; position: absolute; top: -2px; left: 0;
+    width: 4px; height: 4px; border-radius: 50%; background: var(--accent);
+    animation: flow 3s cubic-bezier(.5,0,.5,1) infinite; }
+  @keyframes flow { 0% { left: 0; opacity: 0; } 12% { opacity: 1; }
+    88% { opacity: 1; } 100% { left: calc(100% - 4px); opacity: 0; } }
+  /* Has to sit after the base .net-frame / .mb-screen rules, not up with the
+     rest of the phone overrides: same specificity, so source order decides. */
+  @media (max-width: 600px) {
+    .mb-screen, .net-frame { max-width: 212px; }
+    .net-frame { padding: 0 16px; }
+    .mb-pop { width: 152px; top: 30px; right: 8px; padding: 10px 12px; }
+    .mb-row { font-size: 12px; }
+    .mb-row.dim { font-size: 9px; white-space: nowrap; }
+    .mb-strip { height: 23px; }
+    .dev.phone { width: 26px; height: 44px; }
+    .dev.mac { width: 54px; height: 34px; }
+    .dev.mac i { left: -6px; right: -6px; bottom: -5px; height: 4px; }
+    /* The signaling node is the widest thing in the frame; on a phone it wraps
+       onto two lines instead of pushing through the border. */
+    .node { font-size: 9.5px; padding: 6px 9px; }
+    .node.off { white-space: normal; text-align: center; line-height: 1.5; }
+    .netgap { height: 16px; margin: 7px 0; }
+    .wire-label { margin-bottom: 10px; }
+    .net-legend { margin-top: 10px; }
+  }
+  .netgap { height: 26px; width: 1px; background: repeating-linear-gradient(to bottom, var(--hair-strong) 0 3px, transparent 3px 7px); margin: 12px 0; }
 
   /* ===== ipad ===== */
   .ipad-shot { margin-top: 56px; aspect-ratio: 16 / 10.4; border-radius: 16px; overflow: hidden; border: 0.5px solid var(--hair); }
   .ipad-shot .ph { border: 0; border-radius: 0; height: 100%; }
   .ipad-band { overflow: hidden; }
 
-  /* .sec-head.split — headline and lede share a row on desktop instead of
-     stacking, which buys back most of a screen of height in bands whose
-     real content is below. Top-aligned: both blocks start on the same line,
-     which reads as one row even when the headline runs three lines and the
-     lede two. Mobile keeps the stack: two columns of three words is worse. */
-  @media (min-width: 941px) {
-    .sec-head.split {
-      max-width: none; display: grid; grid-template-columns: 1.35fr 1fr;
-      gap: 0 64px; align-items: start;
-    }
-    .sec-head.split .mono { grid-column: 1 / -1; }
-    .sec-head.split h2 { max-width: 18ch; }
-    /* The lede's cap-height sits lower than the h2's, so a flat 0 leaves it
-       looking dropped — 8px back up puts the two first lines on one optical
-       baseline at the sizes this band uses. */
-    .sec-head.split p { margin-top: -8px; max-width: 32em; }
-  }
+  /* .sec-head.split is gone: it existed to park the lede beside the headline
+     and save a screen of height. The ledes are one line now and the heads are
+     centred, so a stack costs about 50px and reads better. */
 
   /* ===== pricing ===== */
-  .plans { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border-top: 0.5px solid var(--hair); }
-  @media (max-width: 820px) { .plans { grid-template-columns: 1fr; } }
-  .plan { padding: 44px 48px 44px 0; }
-  .plan + .plan { padding: 44px 0 44px 48px; border-left: 0.5px solid var(--hair); }
+  /* Same surface as the Setup/Privacy card, one notch less padding: this one
+     holds a table, not a two-column composition. */
+  .pcard { border: 0.5px solid var(--hair); border-radius: 18px;
+    background: var(--surface); padding: 40px 44px; }
+  .pboth { margin-bottom: 30px; font-size: 15.5px; line-height: 1.6; color: var(--text-2); max-width: 58em; }
+  .pboth b { color: var(--text); font-weight: 500; }
+  /* No rule at the top: the card's own edge already closes the table there. */
+  .ptable { border-top: 0.5px solid var(--hair); }
+  .pcard .ptable { border-top: 0; }
+  /* 1.25, not 1.7: at 1.7 the label ended at 25% of the width and the first
+     value started at 47%, leaving 300px of hole down the middle. */
+  .prow { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 0 36px;
+    padding: 15px 0; border-bottom: 0.5px solid var(--hair); align-items: baseline; }
+  .phead { padding: 13px 0; color: var(--text-3); }
+  .pwhat { font-size: 15.5px; color: var(--text); }
+  .pval { font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--text-3); }
+  .pval.on { color: var(--text); }
+  .price { font-size: 44px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
+  .price .u { font-family: 'IBM Plex Mono', monospace; font-size: 13px; letter-spacing: 0; color: var(--text-3); margin-left: 8px; text-transform: none; }
+  .prow.pfoot { border-bottom: 0; padding-top: 40px; align-items: start; }
+  .pfoot-lede { color: var(--text-2); font-size: 15.5px; max-width: 22em; }
+  .pplan { display: grid; justify-items: start; gap: 14px; }
+  /* .mono uppercases by default — right for a label, shouty for three lines
+     of subscription small print. */
+  .pnote { font-size: 11.5px; line-height: 1.7; color: var(--text-3);
+    text-transform: none; letter-spacing: 0; max-width: 26em; }
   @media (max-width: 820px) {
-    .plan { padding: 36px 0; }
-    .plan + .plan { padding: 36px 0; border-left: 0; border-top: 0.5px solid var(--hair); }
+    /* Three columns of two words each is unreadable on a phone: every row
+       becomes a stack, and the tier name comes back as a prefix on the value. */
+    .prow { grid-template-columns: 1fr; gap: 5px; padding: 16px 0; }
+    .phead { display: none; }
+    .pval::before { content: attr(data-k) " · "; color: var(--text-3); }
+    .prow.pfoot { gap: 34px; padding-top: 34px; }
+    .pfoot-lede { max-width: none; }
+    .pcard { padding: 26px 20px; border-radius: 16px; }
+    /* One column under a centred headline reads as a slab pushed against the
+       left edge. On a phone the whole section centres with its head. */
+    .ptable, .pboth, .fine { text-align: center; }
+    .pboth, .fine { margin-left: auto; margin-right: auto; }
+    .pplan { justify-items: center; }
+    .pnote { max-width: 30em; }
   }
-  .plan h3 { font-size: 26px; }
-  .price { margin: 22px 0 8px; font-size: 52px; font-weight: 300; letter-spacing: -0.04em; line-height: 1; }
-  .price .u { font-family: 'IBM Plex Mono', monospace; font-size: 14px; letter-spacing: 0; color: var(--text-3); margin-left: 8px; text-transform: none; }
-  .plan .note { font-size: 14px; color: var(--text-3); min-height: 44px; }
-  .plan ul { list-style: none; margin: 26px 0 32px; }
-  .plan li { padding: 12px 0; border-top: 0.5px solid var(--hair); font-size: 15.5px; color: var(--text-2); display: flex; gap: 14px; }
-  .plan li::before { content: '—'; color: var(--text-3); flex: none; }
-  .plan li.key { color: var(--text); }
-  .plan li.key::before { content: '+'; color: var(--accent); }
-  .plan li b { color: var(--text); font-weight: 500; }
-  .fine { margin-top: 34px; padding-top: 20px; border-top: 0.5px solid var(--hair); font-size: 13.5px; line-height: 1.7; color: var(--text-3); font-family: 'IBM Plex Mono', monospace; max-width: 62em; }
+  /* The rule used to inherit the 62em reading measure and stopped short of
+     the block above it — the one misalignment you could actually see. It
+     spans the full width now; only the text keeps a measure. */
+  .fine { margin-top: 26px; font-size: 13.5px; line-height: 1.7; color: var(--text-3);
+    font-family: 'IBM Plex Mono', monospace; max-width: 62em; }
   .fine em { font-style: normal; color: var(--text-2); }
 
   /* ===== faq ===== */
-  .faq { border-top: 0.5px solid var(--hair); }
-  .faq details { border-bottom: 0.5px solid var(--hair); }
+  /* The questions carry the same mono numbering as the capabilities and the
+     setup steps — it is what ties the section to the rest of the page. The
+     counter lives in CSS so the markup stays a plain list of <details>. */
+  .faq { border-top: 0.5px solid var(--hair); counter-reset: q; }
+  .faq details { border-bottom: 0.5px solid var(--hair); counter-increment: q; }
   .faq summary {
-    list-style: none; cursor: pointer; padding: 26px 0;
-    display: flex; justify-content: space-between; align-items: baseline; gap: 28px;
-    font-size: clamp(19px, 1.6vw, 23px); letter-spacing: -0.02em; color: var(--text);
+    list-style: none; cursor: pointer; padding: 18px 0;
+    display: grid; grid-template-columns: 3.4em 1fr auto; align-items: baseline; gap: 0 20px;
+    font-size: clamp(18px, 1.4vw, 20px); letter-spacing: -0.02em; color: var(--text);
+  }
+  .faq summary::before {
+    content: counter(q, decimal-leading-zero);
+    font-family: 'IBM Plex Mono', monospace; font-size: 12px; letter-spacing: 0.08em;
+    color: var(--text-3); transition: color 0.25s ease;
+  }
+  .faq details[open] summary::before, .faq summary:hover::before { color: var(--accent); }
+  .faq .ans { margin-left: calc(3.4em + 20px); }
+  /* Phone: the pricing table and the footer centre here, so a left-hugging
+     accordion was the odd one out. The number goes on its own line above the
+     question, both centred, and the +/× keeps the right edge — it is a
+     control, it belongs where the thumb expects it. */
+  @media (max-width: 600px) {
+    .faq summary {
+      grid-template-columns: 1fr; justify-items: center; text-align: center;
+      gap: 4px; padding: 15px 22px; position: relative; font-size: 17px;
+    }
+    /* 22px of side padding rather than 34: at 34 the list had 278px of text
+       and three questions wrapped onto a second line, which is what made it
+       long — the wrap costs more height than the padding ever did. */
+    .faq summary::before { font-size: 11px; }
+    .faq .sign { position: absolute; right: 0; top: 17px; }
+    .faq .ans { margin-left: 0; padding: 0 4px 20px; text-align: center; }
   }
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary:hover { color: var(--accent); }
@@ -560,19 +808,42 @@
   code { font-family: 'IBM Plex Mono', monospace; font-size: .88em; color: var(--text); }
 
   /* ===== download ===== */
-  .get { display: grid; grid-template-columns: 1fr auto; gap: 64px; align-items: center; }
-  @media (max-width: 820px) { .get { grid-template-columns: 1fr; gap: 40px; } }
+  /* The closing block is the one place where centring is unambiguous: a
+     short claim and two buttons, with the QR under them instead of beside. */
+  .get { display: grid; justify-items: center; text-align: center; gap: 40px; }
+  .get .lede { margin-left: auto; margin-right: auto; }
+  .get .ctas, .get .sysreq { justify-content: center; }
   .qr { display: grid; justify-items: center; gap: 10px; }
   .qr img { width: 116px; height: 116px; display: block; border-radius: 8px; background: #fff; padding: 8px; }
 
   /* ===== footer ===== */
   footer { border-top: 0.5px solid var(--hair); padding: 44px 0 56px; }
-  .foot { display: flex; flex-wrap: wrap; gap: 28px; align-items: center; justify-content: space-between; }
-  .foot-links { display: flex; flex-wrap: wrap; gap: 26px; }
-  .foot-links a { font-size: 14px; color: var(--text-2); }
-  .foot-links a:hover { color: var(--text); }
-  .foot-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: 28px; padding-top: 24px; border-top: 0.5px solid var(--hair); }
-  .socials { display: flex; gap: 14px; }
+  /* A single row of five links read as an afterthought. Columns give the
+     footer the same grid discipline as the rest of the page. */
+  .foot { display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 44px; align-items: start; }
+  /* Same reasoning as the pricing table: below the desktop four-column
+     layout the footer centres, otherwise it hangs off the left edge. */
+  @media (max-width: 820px) {
+    .foot { grid-template-columns: 1fr 1fr; gap: 40px 28px; justify-items: center; text-align: center; }
+    .foot-brand { text-align: center; }
+    .foot-brand p { margin-left: auto; margin-right: auto; }
+    .foot-brand .brand { justify-content: center; }
+    .socials { justify-content: center; }
+    .foot-meta { justify-content: center; text-align: center; }
+  }
+  /* Even on a phone the three link groups stay side by side — stacked, the
+     footer ran 600px for eleven links. The brand takes the full row above. */
+  @media (max-width: 520px) {
+    .foot { grid-template-columns: 1fr 1fr; gap: 34px 20px; }
+    .foot-brand { grid-column: 1 / -1; }
+  }
+  .foot-brand p { margin-top: 16px; font-size: 13.5px; line-height: 1.65; color: var(--text-3); max-width: 26em; }
+  .foot-col { display: grid; gap: 13px; align-content: start; }
+  .foot-col .mono { color: var(--text-3); margin-bottom: 3px; }
+  .foot-col a { font-size: 14px; color: var(--text-2); }
+  .foot-col a:hover { color: var(--text); }
+  .foot-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 20px; margin-top: 44px; padding-top: 24px; border-top: 0.5px solid var(--hair); }
+  .socials { display: flex; gap: 14px; margin-top: 5px; }
   .socials a { color: var(--text-3); display: grid; place-items: center; }
   .socials a:hover { color: var(--text); }
 
@@ -580,6 +851,8 @@
     html { scroll-behavior: auto; }
     .rv { opacity: 1; transform: none; transition: none; }
     .thread-line, .in.steps .step::before { animation: none; transform: none; }
+    .seg-panel, .seg-card { transition: none; }
+    .wire::after { animation: none; opacity: 1; }
     .step::before { transform: scaleY(1); }
     .pin-shots .ph { transition: none; }
     .btn:hover, .btn-fill:hover, .btn-line:hover { transform: none; }
@@ -692,9 +965,9 @@
   </div>
 </section>
 
-<section class="tint ipad-band" id="ipad">
+<section class="ipad-band" id="ipad">
   <div class="wrap">
-    <div class="sec-head split rv" style="margin-bottom:0">
+    <div class="sec-head rv" style="margin-bottom:0">
       <span class="mono">iPad</span>
       <h2>On iPad, the terminal and the Simulator sit side by side.</h2>
       <p class="lede">Three columns: projects, session, live Simulator. It stops being a remote control and starts being the workspace.</p>
@@ -707,98 +980,150 @@
 
 <section id="setup">
   <div class="wrap">
-    <div class="sec-head rv">
-      <span class="mono">Setup</span>
-      <h2>Connected in under a minute.</h2>
+    <div class="seg-head rv">
+      <span class="mono">Getting started</span>
     </div>
-    <div class="steps rv" id="steps">
-      <div class="step">
-        <span class="mono num">01</span>
-        <h3>Install the Mac app</h3>
-        <p>A menu-bar companion. Free, direct download.</p>
-      </div>
-      <div class="step">
-        <span class="mono num">02</span>
-        <h3>Sign in with Apple</h3>
-        <p>Same Apple ID on both. Nothing else to create.</p>
-      </div>
-      <div class="step">
-        <span class="mono num">03</span>
-        <h3>Open a project</h3>
-        <p>The iPhone finds your Mac on its own. No IP, no pairing code.</p>
-      </div>
-    </div>
-  </div>
-</section>
 
-<section class="tint" id="privacy">
-  <div class="wrap trust">
-    <div class="rv">
-      <span class="mono" style="display:block;margin-bottom:22px">Privacy</span>
-      <h2>Your code goes between your devices.</h2>
-      <div class="facts" style="margin-top:44px">
-        <div><b>Direct connection.</b> Encrypted WebRTC peer-to-peer between iPhone and Mac, DTLS-SRTP end to end.</div>
-        <div><b>No third party in the path.</b> Our signaling server only relays the initial handshake — never the media. Off your local network a TURN relay may forward bytes it cannot decrypt.</div>
-        <div><b>Your code is never an analytics event.</b> Crash reports and usage counters only — never your files, your prompts or your terminal. One toggle, on the iPhone and on the Mac, turns them off completely.</div>
+    <div class="seg-card rv d1">
+      <div class="seg-panel on" id="segSetup" role="tabpanel" aria-labelledby="segTabSetup">
+        <div class="seg-cols">
+          <div>
+            <h2>Connected in under a minute.</h2>
+            <div class="steps stack" id="steps">
+              <div class="step">
+                <span class="mono num">01</span>
+                <h3>Install the Mac app</h3>
+                <p>A menu-bar companion. Free, direct download.</p>
+              </div>
+              <div class="step">
+                <span class="mono num">02</span>
+                <h3>Sign in with Apple</h3>
+                <p>Same Apple ID on both. Nothing else to create.</p>
+              </div>
+              <div class="step">
+                <span class="mono num">03</span>
+                <h3>Open a project</h3>
+                <p>The iPhone finds your Mac on its own. No IP, no pairing code.</p>
+              </div>
+            </div>
+          </div>
+          <!-- The Mac side never opens a window: it lives in the menu bar, so
+               the drawing is the menu bar, in the same line-art register as the
+               privacy diagram opposite. -->
+          <div class="mbviz" aria-hidden="true">
+            <div class="mb-screen">
+              <div class="mb-strip">
+                <span class="mb-dot"></span>
+                <span class="mb-dot"></span>
+                <img src="app-icon-128.png" width="14" height="14" alt="">
+                <span class="mb-time mono">16:03</span>
+              </div>
+              <div class="mb-pop">
+                <div class="mb-row"><span class="mb-led"></span><span>Connected</span></div>
+                <div class="mb-row mono dim">iPhone 17 · this Mac</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="seg-panel" id="segPrivacy" role="tabpanel" aria-labelledby="segTabPrivacy">
+        <div id="privacy" class="seg-cols">
+          <div>
+            <h2>Your code goes between your devices.</h2>
+            <div class="facts">
+              <div><b>Direct connection.</b> Encrypted WebRTC peer-to-peer between iPhone and Mac, DTLS-SRTP end to end.</div>
+              <div><b>No third party in the path.</b> Our signaling server only relays the initial handshake — never the media. Off your local network a TURN relay may forward bytes it cannot decrypt.</div>
+              <div><b>Your code is never an analytics event.</b> Crash reports and usage counters only — never your files, your prompts or your terminal. One toggle, on the iPhone and on the Mac, turns them off completely.</div>
+            </div>
+          </div>
+          <div class="netviz mono">
+            <div class="net-frame">
+              <span class="wire-label">encrypted · DTLS-SRTP</span>
+              <div class="netrow">
+                <span class="dev phone" aria-hidden="true"><i></i></span>
+                <span class="wire"></span>
+                <span class="dev mac" aria-hidden="true"><i></i></span>
+              </div>
+              <div class="net-legend"><span>iPhone</span><span>Mac</span></div>
+              <div class="netgap"></div>
+              <span class="node off">signaling — handshake only</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="netviz mono rv d1">
-      <div class="netrow">
-        <span class="node">iPhone</span>
-        <span class="wire"></span>
-        <span class="node">Mac</span>
+
+    <div class="segs-row rv d1">
+      <div class="segs mono" role="tablist" aria-label="Setup and privacy" id="segs">
+        <button type="button" role="tab" id="segTabSetup" aria-controls="segSetup" aria-selected="true">Setup</button>
+        <button type="button" role="tab" id="segTabPrivacy" aria-controls="segPrivacy" aria-selected="false" tabindex="-1">Privacy</button>
       </div>
-      <div class="netgap"></div>
-      <span class="node off">signaling server — handshake only</span>
     </div>
   </div>
 </section>
 
 <section id="pricing">
   <div class="wrap">
-    <div class="sec-head split rv">
+    <!-- No lede: the headline, the "unlimited on both tiers" line below and
+         the table's own column head already said it three times. -->
+    <div class="sec-head rv">
       <span class="mono">Pricing</span>
       <h2>Free every day. Paid when you want more of it.</h2>
-      <p class="lede">Chat, terminal and builds are unlimited on the free tier — always, on any network. What the free tier meters is the expensive part: streaming the Simulator, installing to your iPhone, and uploading files. Those reset every day.</p>
     </div>
 
-    <div class="plans rv d1" id="plansGrid">
-      <div class="plan">
-        <h3>Free</h3>
-        <div class="price">$0<span class="u">/ forever</span></div>
-        <p class="note">A daily allowance, renewed every morning. Sign in with Apple. Limits apply on any network, Wi-Fi included.</p>
-        <ul>
-          <li class="key"><span><b>Unlimited chat</b> with Claude Code and Codex</span></li>
-          <li class="key"><span><b>Unlimited terminal sessions and builds</b></span></li>
-          <li><span>A daily allowance of Simulator streaming</span></li>
-          <li><span>A couple of installs to your iPhone per day</span></li>
-          <li><span>A size cap on file uploads</span></li>
-          <li><span>Works on Wi-Fi and over the internet alike</span></li>
-        </ul>
-        <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-line">Download on the App Store <span class="arw">→</span></a>
+    <!-- Five of the eight rows said "Unlimited / Unlimited" — a comparison
+         table for things that don't differ. They are one sentence now, and
+         the table holds only what actually separates the two tiers. -->
+    <!-- In a card, like the Setup/Privacy band: since the tinted bands went
+         away, cards are the page's only relief, and this table was the one
+         large block still floating bare under a centred headline. -->
+    <div class="pcard rv d1">
+    <p class="pboth"><b>Unlimited on both tiers</b> — chat with Claude Code and Codex, terminal sessions on the Mac, Xcode builds, working off your Wi-Fi over the internet, and encrypted peer-to-peer with a TURN relay as fallback.</p>
+
+    <div class="ptable" id="plansGrid">
+      <div class="prow phead mono">
+        <span>What's metered</span>
+        <span>Free</span>
+        <span>Premium</span>
+      </div>
+      <div class="prow">
+        <span class="pwhat">Simulator streaming</span>
+        <span class="pval" data-k="Free">A daily allowance</span>
+        <span class="pval on" data-k="Premium">Unlimited</span>
+      </div>
+      <div class="prow">
+        <span class="pwhat">Installs to your iPhone</span>
+        <span class="pval" data-k="Free">A couple a day</span>
+        <span class="pval on" data-k="Premium">Unlimited</span>
+      </div>
+      <div class="prow">
+        <span class="pwhat">File uploads</span>
+        <span class="pval" data-k="Free">Size cap</span>
+        <span class="pval on" data-k="Premium">Larger cap</span>
       </div>
 
-      <div class="plan">
-        <h3>Premium</h3>
-        <div class="price">$4.99<span class="u">/ month</span></div>
-        <p class="note">The same app, without the daily ceiling. 1-week free trial, auto-renews via Apple, cancel anytime in Settings. Pricing may vary by region.</p>
-        <ul>
-          <li><span>Everything in Free</span></li>
-          <li class="key"><span><b>Unlimited Simulator streaming</b></span></li>
-          <li class="key"><span><b>Unlimited installs</b> to your iPhone</span></li>
-          <li><span>Larger file uploads</span></li>
-          <li><span>Encrypted WebRTC peer-to-peer, TURN relay as fallback</span></li>
-          <li><span>End-to-end DTLS-SRTP — the relay only ever sees encrypted bytes</span></li>
-        </ul>
-        <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-fill">Download on the App Store <span class="arw">→</span></a>
+      <div class="prow pfoot">
+        <span class="pwhat pfoot-lede">The same app either way. What you pay for is the daily ceiling going away.</span>
+        <span class="pplan">
+          <span class="price">$0<span class="u">/ forever</span></span>
+          <span class="pnote mono">Renewed every morning. Sign in with Apple. Limits apply on any network, Wi-Fi included.</span>
+          <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-line">Download on the App Store <span class="arw">→</span></a>
+        </span>
+        <span class="pplan">
+          <span class="price">$4.99<span class="u">/ month</span></span>
+          <span class="pnote mono">1-week free trial, auto-renews via Apple, cancel anytime in Settings. Pricing may vary by region.</span>
+          <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-fill">Download on the App Store <span class="arw">→</span></a>
+        </span>
       </div>
     </div>
+    </div>
 
-    <p class="fine rv d2">Daily limits are set server-side and may be adjusted; the app always shows what you have left. Remote access is <em>not</em> the paid feature — Xtend reaches your Mac from anywhere on both tiers.</p>
+    <p class="fine rv d2">Daily limits are set server-side and may be adjusted; the app always shows what you have left.</p>
   </div>
 </section>
 
-<section class="tint" id="faq">
+<section id="faq">
   <div class="wrap">
     <div class="sec-head rv">
       <span class="mono">FAQ</span>
@@ -835,10 +1160,6 @@
         <p class="ans">Only the metered part stops. If you run out of Simulator minutes the video pauses — your chat, terminal and builds keep working, and the session stays connected. Everything resets the next day, or you can upgrade to remove the ceiling.</p>
       </details>
       <details>
-        <summary>My connection keeps dropping — what should I check?<span class="sign">+</span></summary>
-        <p class="ans">Most drops come from Wi-Fi roaming or a VPN — the app retries automatically. Also check that no other device is holding the session: for now Xtend supports one active connection at a time, so make sure your Mac isn't paired with a second iPhone and your iPhone isn't connected to another Mac.</p>
-      </details>
-      <details>
         <summary>What's coming next?<span class="sign">+</span></summary>
         <p class="ans">Multiple Macs per account, session recordings, and team accounts are the next things on the list. Dates aren't promises — software ships when it ships.</p>
       </details>
@@ -868,16 +1189,34 @@
 <footer>
   <div class="wrap">
     <div class="foot rv">
-      <div class="foot-links">
-        <a href="support.html">Support</a>
+      <div class="foot-brand">
+        <a href="#top" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="#capabilities">Capabilities</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#faq">FAQ</a>
+        <a href="#download">Download</a>
+      </div>
+
+      <div class="foot-col">
+        <span class="mono">Legal</span>
         <a href="privacy.html">Privacy</a>
         <a href="terms.html">Terms</a>
         <a href="acknowledgements.html">Acknowledgements</a>
-        <a href="mailto:maouizerat@gmail.com">Contact</a>
       </div>
+
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
       <div class="socials">
         <a href="https://github.com/mendidou" target="_blank" rel="noopener" aria-label="GitHub"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"></path></svg></a>
         <a href="https://www.linkedin.com/in/mendy-aouizerat-057a201a0/" target="_blank" rel="noopener" aria-label="LinkedIn"><svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"></path></svg></a>
+        </div>
       </div>
     </div>
     <div class="foot-meta mono rv d1">
@@ -1284,6 +1623,66 @@ window.__resources = { proofVideo: 'proof.mp4', proofPoster: 'proof-poster.jpg' 
           swap = setTimeout(function () { live.innerHTML = cur.innerHTML; live.style.opacity = '1'; }, 180);
         }
       });
+    }
+  }
+
+  /* ---- setup / privacy segmented control ---- */
+  var segs = document.getElementById('segs');
+  if (segs) {
+    var segTabs = segs.querySelectorAll('button[role="tab"]');
+    /* Both panels share one grid cell, so the card is as tall as the taller of
+       the two — which left the shorter tab with 79px of empty card underneath
+       on a phone. The card takes the height of the panel actually on show and
+       animates between the two, so nothing jumps and nothing is wasted. With
+       JS off the grid still equalises them: no measurement, no collapse. */
+    var segCard = document.querySelector('.seg-card');
+    var segSize = function () {
+      if (!segCard) return;
+      var on = segCard.querySelector('.seg-panel.on');
+      var inner = on && on.firstElementChild;
+      if (!inner) return;
+      var cs = getComputedStyle(segCard);
+      segCard.style.height = (inner.getBoundingClientRect().height
+        + parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom)) + 'px';
+    };
+    var segShow = function (tab, focus) {
+      for (var s = 0; s < segTabs.length; s++) {
+        var t = segTabs[s], on = t === tab;
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+        t.tabIndex = on ? 0 : -1;
+        var panel = document.getElementById(t.getAttribute('aria-controls'));
+        if (panel) panel.classList.toggle('on', on);
+      }
+      segSize();
+      if (focus) tab.focus();
+    };
+    segSize();
+    window.addEventListener('load', segSize);
+    var segRs;
+    window.addEventListener('resize', function () {
+      clearTimeout(segRs); segRs = setTimeout(segSize, 120);
+    });
+    segs.addEventListener('click', function (e) {
+      var tab = e.target.closest('button[role="tab"]');
+      if (tab) segShow(tab, false);
+    });
+    /* Arrow keys move between tabs — what a screen reader expects from a
+       tablist, and the only keyboard route to the second panel, since the
+       unselected tab is deliberately out of the tab order. */
+    segs.addEventListener('keydown', function (e) {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      var i = Array.prototype.indexOf.call(segTabs, e.target);
+      if (i < 0) return;
+      e.preventDefault();
+      segShow(segTabs[(i + (e.key === 'ArrowRight' ? 1 : segTabs.length - 1)) % segTabs.length], true);
+    });
+    /* A deep link to /#privacy used to land on its own section — it opens the
+       panel now, and the section still owns the #setup anchor. */
+    if (location.hash === '#privacy') {
+      segShow(document.getElementById('segTabPrivacy'), false);
+      /* The browser could not scroll to #privacy on its own: the id lives in a
+         panel that is display:none until the tab opens it. */
+      document.getElementById('setup').scrollIntoView();
     }
   }
 

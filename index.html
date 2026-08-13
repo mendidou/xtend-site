@@ -789,10 +789,14 @@
   @media (max-width: 600px) {
     .faq summary {
       grid-template-columns: 1fr; justify-items: center; text-align: center;
-      gap: 8px; padding: 24px 34px; position: relative;
+      gap: 4px; padding: 15px 22px; position: relative; font-size: 17px;
     }
-    .faq .sign { position: absolute; right: 0; top: 26px; }
-    .faq .ans { margin-left: 0; padding: 0 4px 26px; text-align: center; }
+    /* 22px of side padding rather than 34: at 34 the list had 278px of text
+       and three questions wrapped onto a second line, which is what made it
+       long — the wrap costs more height than the padding ever did. */
+    .faq summary::before { font-size: 11px; }
+    .faq .sign { position: absolute; right: 0; top: 17px; }
+    .faq .ans { margin-left: 0; padding: 0 4px 20px; text-align: center; }
   }
   .faq summary::-webkit-details-marker { display: none; }
   .faq summary:hover { color: var(--accent); }

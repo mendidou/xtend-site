@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta name="robots" content="noindex">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Acknowledgements — Xtend</title>
+<meta name="description" content="Open-source projects and licenses used by Xtend.">
+
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Acknowledgements — Xtend" />
+<meta property="og:description" content="Open-source projects Xtend builds on." />
+<meta property="og:url" content="https://getxtend.com/acknowledgements.html" />
+<meta property="og:image" content="https://getxtend.com/xtend-og.png" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Acknowledgements — Xtend" />
+<meta name="twitter:description" content="Open-source projects Xtend builds on." />
+<meta name="twitter:image" content="https://getxtend.com/xtend-og.png" />
+
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="annex.css">
+<script>
+(function () {
+  var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', m);
+})();
+</script>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="index.html"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+  </div>
+</nav>
+
+<div class="container">
+  <span class="label">Acknowledgements</span>
+  <h1>Built on the <em>shoulders</em> of giants.</h1>
+  <p class="lede">Xtend uses the following open-source projects. Thank you to their authors and contributors.</p>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/stasel/WebRTC" target="_blank" rel="noopener">WebRTC</a></div>
+    <div class="credit-license">BSD 3-Clause</div>
+    <div class="credit-desc">Google's WebRTC implementation, packaged as a Swift Package by stasel. Powers the iPhone ↔ Mac peer connection (DTLS-SRTP media, SCTP data channels).</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/migueldeicaza/SwiftTerm" target="_blank" rel="noopener">SwiftTerm</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Terminal emulator by Miguel de Icaza — renders the terminal on iOS and drives the Mac-side PTY relay.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/apple/swift-argument-parser" target="_blank" rel="noopener">swift-argument-parser</a></div>
+    <div class="credit-license">Apache 2.0</div>
+    <div class="credit-desc">Apple's argument-parsing framework, used by build-tooling helpers inside the project.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://sparkle-project.org" target="_blank" rel="noopener">Sparkle</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Software-update framework for macOS — keeps the Mac companion up to date.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://firebase.google.com" target="_blank" rel="noopener">Firebase (Crashlytics, Remote Config)</a></div>
+    <div class="credit-license">Apache 2.0</div>
+    <div class="credit-desc">Crash reporting and server-side configuration. Never your code or terminal contents, and switched off entirely by the Share Usage Data toggle — see the privacy policy.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/mixpanel/mixpanel-swift" target="_blank" rel="noopener">Mixpanel Swift</a></div>
+    <div class="credit-license">Apache 2.0</div>
+    <div class="credit-desc">Usage counters, opt out via Share Usage Data on the iPhone or the Mac — see the privacy policy.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/panva/jose" target="_blank" rel="noopener">jose</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">JWT / JWS implementation used server-side to sign Xtend session tokens and verify Apple ID tokens during Sign-in-with-Apple flow.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://github.com/websockets/ws" target="_blank" rel="noopener">ws</a></div>
+    <div class="credit-license">MIT License</div>
+    <div class="credit-desc">Node.js WebSocket server used by our signaling backend to shuttle WebRTC handshake messages between the iPhone and the Mac.</div>
+  </div>
+
+  <div class="credit">
+    <div class="credit-name"><a href="https://fonts.google.com/specimen/IBM+Plex+Mono" target="_blank" rel="noopener">IBM Plex Mono</a></div>
+    <div class="credit-license">SIL Open Font License 1.1</div>
+    <div class="credit-desc">Monospace typeface used on this website and in the app's terminal and labels.</div>
+  </div>
+
+  <p style="margin-top:32px;font-size:13px;color:var(--ink-mute)">Trademarks: Xcode, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. Xtend is not affiliated with Apple Inc.</p>
+
+  <a href="index.html" class="back">← Back to Xtend</a>
+</div>
+
+<footer class="site-footer">
+  <div class="site-footer-inner">
+    <span>© 2026 Xtend · Made in Israel</span>
+    <div class="site-footer-links">
+      <a href="privacy.html">Privacy</a>
+      <a href="terms.html">Terms</a>
+      <a href="support.html">Support</a>
+      <a href="acknowledgements.html">Acknowledgements</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

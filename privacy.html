@@ -117,7 +117,7 @@
     <li><strong>Apple StoreKit / App Store</strong> — handles subscription billing. We also query Apple's App Store Server API to confirm a subscription is still active when our own record has gone stale.</li>
     <li><strong>Apple Push Notification service</strong> — delivers the notification that a build or long-running command has finished. Apple sees the device token and the notification payload.</li>
     <li><strong>Fly.io</strong> — hosts our signaling server (matches your iPhone with your Mac, shuttles WebRTC handshake messages between them, and holds the daily usage counters described above). Logs include masked IPs and operational metadata only; never WebRTC payload.</li>
-    <li><strong>Cloudflare</strong> — provides the TURN relay used as a fallback for WebRTC when direct P2P is not possible. Relay packets are encrypted with DTLS-SRTP — Cloudflare cannot decrypt them.</li>
+    <li><strong>Cloudflare</strong> — provides the TURN relay used as a fallback for WebRTC when direct P2P is not possible. Relay packets are encrypted with DTLS-SRTP — Cloudflare cannot decrypt them. Cloudflare Web Analytics also measures page views on this website: it is cookieless, stores no personal data, and does not identify individual visitors.</li>
     <li><strong>Firebase Crashlytics</strong> (Google) — crash reports, hangs, and diagnostics. See the "Usage analytics and crash reporting" section above for what they are keyed to and how to turn them off.</li>
     <li><strong>Mixpanel</strong> — product analytics, received on Mixpanel's EU servers. Opt-out via the Share Usage Data toggle on either app.</li>
   </ul>
@@ -131,14 +131,14 @@
   <p>If you're in the EU, UK, or California, you have rights under the GDPR and CCPA to access, correct, port, restrict, or delete the personal data we hold about you, and to object to certain processing.</p>
   <p><strong>How to exercise your rights:</strong> the fastest path for deletion is the in-app <strong>Delete Account</strong> button. For access, correction, portability, or other requests, email <a href="mailto:maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20data%20rights%20request" style="color:var(--ink)">maouizerat@gmail.com</a> with the subject "Data Rights Request" and a description of what you want. We will respond within <strong>30 days</strong>. Because we only store the minimal account record described above, most requests result in a copy of that record or a confirmation of deletion.</p>
   <p><strong>Legal basis (GDPR Art. 6):</strong> performance of the contract with you (account creation and the paired-device service you signed up for), and our legitimate interest in preventing fraud and abuse of the service.</p>
-  <p><strong>"Do Not Track":</strong> Xtend does not use tracking technologies regardless of DNT signal. This website uses no analytics or tracking either.</p>
+  <p><strong>"Do Not Track":</strong> Xtend does not use tracking technologies regardless of DNT signal. This website uses Cloudflare Web Analytics, which sets no cookies, stores no personal data, and does not track individual visitors.</p>
   <p><strong>International transfers:</strong> our signaling server runs on Fly.io in the Frankfurt region (EU), and Mixpanel events are sent to Mixpanel's EU endpoint. Cloudflare TURN routes via Cloudflare's global edge, and Firebase Crashlytics is operated by Google. Apple services (Sign in with Apple, StoreKit, push notifications) are operated by Apple under their own terms and may transit to Apple-controlled regions, including under EU Standard Contractual Clauses where applicable.</p>
 
   <h2>Security</h2>
   <p>All client-to-server traffic uses TLS 1.2+ (HTTPS for auth and management endpoints, WSS for signaling). All WebRTC media uses DTLS-SRTP — the encryption keys are negotiated end-to-end between your iPhone and your Mac, not held by any intermediary. Session tokens are stored on-device in the iOS Keychain with <code style="background:var(--bg-elev);padding:1px 5px;border-radius:3px;font-size:12px">kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly</code> (survives reboot, never syncs, never leaves the device). The Apple refresh token is held server-side, used only to revoke your session on account deletion, and never exposed to the client.</p>
 
   <h2>Cookies &amp; tracking technologies</h2>
-  <p>Xtend's iOS and macOS apps do not use cookies, web beacons, fingerprinting, or any tracking technology. This website uses no analytics or tracking either.</p>
+  <p>Xtend's iOS and macOS apps do not use cookies, web beacons, fingerprinting, or any tracking technology. This website uses Cloudflare Web Analytics, which sets no cookies, stores no personal data, and does not track individual visitors.</p>
 
   <h2>Children's privacy</h2>
   <p>Xtend is a developer tool intended for users 17 and older, matching its App Store age rating. We do not knowingly collect data from children.</p>
@@ -166,5 +166,6 @@
   </div>
 </footer>
 
+<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b44e30b5be214629930561007feb48bb"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

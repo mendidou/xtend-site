@@ -1,45 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Acknowledgements — Xtend</title>
+<title>Acknowledgements. Xtend</title>
 <meta name="description" content="Open-source projects and licenses used by Xtend.">
-
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Acknowledgements — Xtend" />
+<meta property="og:title" content="Acknowledgements. Xtend" />
 <meta property="og:description" content="Open-source projects Xtend builds on." />
 <meta property="og:url" content="https://getxtend.com/acknowledgements.html" />
 <meta property="og:image" content="https://getxtend.com/xtend-og.png" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Acknowledgements — Xtend" />
+<meta name="twitter:title" content="Acknowledgements. Xtend" />
 <meta name="twitter:description" content="Open-source projects Xtend builds on." />
 <meta name="twitter:image" content="https://getxtend.com/xtend-og.png" />
-
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="annex.css">
+<link rel="alternate" type="application/rss+xml" title="Xtend Journal" href="https://getxtend.com/blog/feed.xml">
+<link rel="stylesheet" href="site.css">
 <script>
 (function () {
   var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
-  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', m);
+  document.documentElement.style.colorScheme = m;
 })();
 </script>
+<style>
+  main.journal { padding: 132px 0 72px; }
+  .annexe { margin: 0 auto; }
+  .annexe h1 { margin: 10px 0 14px; }
+  .annexe h2 { margin: 2.8rem 0 0.9rem; padding-top: 1.6rem; border-top: 1px solid var(--hair-strong); }
+  .annexe h3 { margin: 1.6rem 0 0.5rem; }
+  .annexe p { margin: 0.85rem 0; }
+  .annexe ul, .annexe ol { margin: 0.85rem 0 0.85rem 1.35rem; color: var(--text-2); }
+  .annexe li { line-height: 1.6; margin: 0.45rem 0; }
+  .annexe li::marker { color: var(--text-3); }
+  .annexe pre { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 0.95rem 1.15rem; overflow-x: auto; margin: 1rem 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; line-height: 1.6; color: var(--text-2); }
+  .annexe code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.85em;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 5px; padding: 0.1em 0.35em; }
+  .annexe pre code { border: none; background: none; padding: 0; }
+  .annexe .label { display: block; font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .annexe .effective { font-size: 12px; color: var(--text-3); margin-bottom: 34px; display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .annexe .lede { margin: 0 0 0.6rem; }
+  .annexe hr { border: 0; border-top: 1px solid var(--hair-strong); margin: 2.4rem 0; }
+  .annexe .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 1.4rem 0 0.5rem; }
+  .annexe .btn-primary { background: var(--accent); color: var(--accent-ink); border-radius: 10px;
+    padding: 12px 20px; text-decoration: none; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13.5px; display: inline-flex; gap: 8px; align-items: center; }
+  .annexe .btn-ghost { color: var(--text); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 12px 20px; text-decoration: none; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13.5px; display: inline-flex; gap: 8px; align-items: center; }
+  .annexe .btn-ghost:hover { border-color: var(--text-3); }
+  .annexe .credit { padding: 20px 0; border-top: 1px solid var(--hair); }
+  .annexe .credit:first-of-type { border-top: 0; }
+  .annexe .credit-name { font-weight: 600; color: var(--text); display: inline; }
+  .annexe .credit-license { display: inline-block; margin-left: 10px; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent); border: 1px solid var(--hair-strong);
+    border-radius: 5px; padding: 2px 7px; vertical-align: 2px; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .annexe .credit-desc { color: var(--text-2); margin-top: 6px; }
+  .annexe .back { display: inline-block; margin-top: 46px; font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13.5px; color: var(--text-2); text-decoration: none; }
+  .annexe .back:hover { color: var(--text); }
+  .annexe .qa { margin: 1.2rem 0; }
+  .annexe .q { font-weight: 600; color: var(--text); }
+  .annexe .ans { color: var(--text-2); }
+</style>
 </head>
-<body>
+<body id="top">
 
-<nav>
-  <div class="nav-inner">
-    <a href="index.html"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+<nav id="nav">
+  <div class="nav-in">
+    <a href="index.html" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+    <div class="nav-r">
+      <a href="blog/index.html" class="link">Journal</a>
+      <a href="index.html#capabilities" class="link">Capabilities</a>
+      <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-sm btn-fill">App Store</a>
+    </div>
   </div>
 </nav>
 
-<div class="container">
-  <span class="label">Acknowledgements</span>
+<main class="journal"><div class="wrap">
+<article class="annexe">
+<span class="label">Acknowledgements</span>
   <h1>Built on the <em>shoulders</em> of giants.</h1>
   <p class="lede">Xtend uses the following open-source projects. Thank you to their authors and contributors.</p>
 
@@ -52,7 +97,7 @@
   <div class="credit">
     <div class="credit-name"><a href="https://github.com/migueldeicaza/SwiftTerm" target="_blank" rel="noopener">SwiftTerm</a></div>
     <div class="credit-license">MIT License</div>
-    <div class="credit-desc">Terminal emulator by Miguel de Icaza — renders the terminal on iOS and drives the Mac-side PTY relay.</div>
+    <div class="credit-desc">Terminal emulator by Miguel de Icaza, renders the terminal on iOS and drives the Mac-side PTY relay.</div>
   </div>
 
   <div class="credit">
@@ -64,19 +109,19 @@
   <div class="credit">
     <div class="credit-name"><a href="https://sparkle-project.org" target="_blank" rel="noopener">Sparkle</a></div>
     <div class="credit-license">MIT License</div>
-    <div class="credit-desc">Software-update framework for macOS — keeps the Mac companion up to date.</div>
+    <div class="credit-desc">Software-update framework for macOS, keeps the Mac companion up to date.</div>
   </div>
 
   <div class="credit">
     <div class="credit-name"><a href="https://firebase.google.com" target="_blank" rel="noopener">Firebase (Crashlytics, Remote Config)</a></div>
     <div class="credit-license">Apache 2.0</div>
-    <div class="credit-desc">Crash reporting and server-side configuration. Never your code or terminal contents, and switched off entirely by the Share Usage Data toggle — see the privacy policy.</div>
+    <div class="credit-desc">Crash reporting and server-side configuration. Never your code or terminal contents, and switched off entirely by the Share Usage Data toggle, see the privacy policy.</div>
   </div>
 
   <div class="credit">
     <div class="credit-name"><a href="https://github.com/mixpanel/mixpanel-swift" target="_blank" rel="noopener">Mixpanel Swift</a></div>
     <div class="credit-license">Apache 2.0</div>
-    <div class="credit-desc">Usage counters, opt out via Share Usage Data on the iPhone or the Mac — see the privacy policy.</div>
+    <div class="credit-desc">Usage counters, opt out via Share Usage Data on the iPhone or the Mac, see the privacy policy.</div>
   </div>
 
   <div class="credit">
@@ -100,20 +145,80 @@
   <p style="margin-top:32px;font-size:13px;color:var(--ink-mute)">Trademarks: Xcode, iPhone, iPad, macOS, and iOS are trademarks of Apple Inc. Xtend is not affiliated with Apple Inc.</p>
 
   <a href="index.html" class="back">← Back to Xtend</a>
-</div>
+</article>
+</div></main>
 
-<footer class="site-footer">
-  <div class="site-footer-inner">
-    <span>© 2026 Xtend · Made in Israel</span>
-    <div class="site-footer-links">
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="support.html">Support</a>
-      <a href="acknowledgements.html">Acknowledgements</a>
+<footer>
+  <div class="wrap">
+    <div class="foot rv in">
+      <div class="foot-brand">
+        <a href="index.html" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="index.html#capabilities">Capabilities</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="index.html#download">Download</a>
+        <a href="blog/index.html">Journal</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Legal</span>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="acknowledgements.html">Acknowledgements</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="foot-meta mono rv in">
+      <div class="themes" id="themes" role="radiogroup" aria-label="Theme">
+        <button data-set="system" aria-label="System theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></button>
+        <button data-set="light" aria-label="Light theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+        <button data-set="dark" aria-label="Dark theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg></button>
+      </div>
+      <span>Xtend © 2026</span>
+      <span>Created by Mendy Aouizerat</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
     </div>
   </div>
 </footer>
 
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b44e30b5be214629930561007feb48bb"}'></script><!-- End Cloudflare Web Analytics -->
+<script>
+(function () {
+  'use strict';
+  var KEY = 'xtend-theme-mode';
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function osTheme() { return mq && mq.matches ? 'light' : 'dark'; }
+  function readMode() { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } }
+  function apply(mode) {
+    var r = mode === 'system' ? osTheme() : mode;
+    document.documentElement.setAttribute('data-theme', r);
+    document.documentElement.style.colorScheme = r;
+    var btns = document.querySelectorAll('.themes button');
+    for (var i = 0; i < btns.length; i++)
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-set') === mode ? 'true' : 'false');
+  }
+  apply(readMode());
+  var seg = document.getElementById('themes');
+  if (seg) seg.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-set]');
+    if (!b) return;
+    var m = b.getAttribute('data-set');
+    try { localStorage.setItem(KEY, m); } catch (err) {}
+    apply(m);
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (readMode() === 'system') apply('system'); });
+  var nav = document.getElementById('nav');
+  function onScroll() { if (nav) nav.classList.toggle('stuck', (window.scrollY || 0) > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
 </body>
 </html>

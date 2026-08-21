@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Journal. Xtend</title>
+<meta name="description" content="Engineering notes from building Xtend: terminals, PTYs, WebRTC, SwiftTerm, StoreKit, the parts nobody documents.">
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Journal. Xtend" />
+<meta property="og:description" content="Engineering notes from building Xtend: terminals, PTYs, WebRTC, SwiftTerm, StoreKit, the parts nobody documents." />
+<meta property="og:url" content="https://getxtend.com/blog/" />
+<meta property="og:image" content="https://getxtend.com/xtend-og.png" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate" type="application/rss+xml" title="Xtend Journal" href="https://getxtend.com/blog/feed.xml">
+<link rel="stylesheet" href="../site.css">
+<script>
+(function () {
+  var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', m);
+  document.documentElement.style.colorScheme = m;
+})();
+</script>
+<style>
+  main.journal { padding: 132px 0 72px; }
+  .jhead { margin: 0 auto; }
+  .jhead .lede { margin-top: 12px; }
+  .post-list { list-style: none; margin: 2.6rem auto 0; padding: 0; }
+  .post-list li { border-top: 1px solid var(--hair-strong); padding: 1.6rem 0; }
+  .post-list li:last-child { border-bottom: 1px solid var(--hair-strong); }
+  .post-list .d { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.74rem;
+    letter-spacing: 0.06em; color: var(--text-3); display: block; margin-bottom: 0.45rem; }
+  .post-list a.t { font-size: 1.25rem; font-weight: 600; color: var(--text); text-decoration: none; }
+  .post-list a.t:hover { color: var(--accent); }
+  .post-list p { margin: 0.6rem 0 0; color: var(--text-2); line-height: 1.6; }
+  .rss-line { margin: 2.2rem auto 0; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; color: var(--text-3); }
+  .rss-line a { color: var(--accent); }
+</style>
+</head>
+<body id="top">
+
+<nav id="nav">
+  <div class="nav-in">
+    <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+    <div class="nav-r">
+      <a href="index.html" class="link">Journal</a>
+      <a href="../index.html#capabilities" class="link">Capabilities</a>
+      <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-sm btn-fill">App Store</a>
+    </div>
+  </div>
+</nav>
+
+<main class="journal"><div class="wrap">
+
+  <div class="jhead">
+    <span class="mono">JOURNAL</span>
+    <h1>The parts nobody documents</h1>
+    <p class="lede">Engineering notes from building Xtend: a solo project to reach a Mac
+    dev environment from an iPhone. Terminals, PTYs, WebRTC, SwiftTerm, StoreKit, including
+    the dead ends. Written by
+    <a href="https://www.linkedin.com/in/mendy-aouizerat/">Mendy Aouizerat</a>.</p>
+  </div>
+
+  <ul class="post-list">
+    <li>
+      <span class="d">2026-08-21</span>
+      <a class="t" href="terminal-state-you-cant-replay.html">Why Claude Code garbles when you rotate your phone</a>
+      <p>Two weeks on column widths, one measurement that ended them, and the thing every
+      "attach to a running session" implementation gets wrong.</p>
+    </li>
+  </ul>
+
+  <p class="rss-line"><a href="feed.xml">RSS feed</a> · new posts land there first.</p>
+
+</div></main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot rv in">
+      <div class="foot-brand">
+        <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="../index.html#capabilities">Capabilities</a>
+        <a href="../index.html#pricing">Pricing</a>
+        <a href="../index.html#faq">FAQ</a>
+        <a href="../index.html#download">Download</a>
+        <a href="index.html">Journal</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Legal</span>
+        <a href="../privacy.html">Privacy</a>
+        <a href="../terms.html">Terms</a>
+        <a href="../acknowledgements.html">Acknowledgements</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="../support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="foot-meta mono rv in">
+      <div class="themes" id="themes" role="radiogroup" aria-label="Theme">
+        <button data-set="system" aria-label="System theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></button>
+        <button data-set="light" aria-label="Light theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+        <button data-set="dark" aria-label="Dark theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg></button>
+      </div>
+      <span>Xtend © 2026</span>
+      <span>Created by Mendy Aouizerat</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'xtend-theme-mode';
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function osTheme() { return mq && mq.matches ? 'light' : 'dark'; }
+  function readMode() { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } }
+  function apply(mode) {
+    var r = mode === 'system' ? osTheme() : mode;
+    document.documentElement.setAttribute('data-theme', r);
+    document.documentElement.style.colorScheme = r;
+    var btns = document.querySelectorAll('.themes button');
+    for (var i = 0; i < btns.length; i++)
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-set') === mode ? 'true' : 'false');
+  }
+  apply(readMode());
+  var seg = document.getElementById('themes');
+  if (seg) seg.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-set]');
+    if (!b) return;
+    var m = b.getAttribute('data-set');
+    try { localStorage.setItem(KEY, m); } catch (err) {}
+    apply(m);
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (readMode() === 'system') apply('system'); });
+  var nav = document.getElementById('nav');
+  function onScroll() { if (nav) nav.classList.toggle('stuck', (window.scrollY || 0) > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
+</body>
+</html>

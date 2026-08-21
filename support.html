@@ -1,47 +1,92 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Support — Xtend</title>
+<title>Support. Xtend</title>
 <meta name="description" content="Get help with Xtend: setup, permissions, connection issues, build/scheme detection, terminal sessions.">
-
 <meta property="og:type" content="article" />
-<meta property="og:title" content="Support — Xtend" />
+<meta property="og:title" content="Support. Xtend" />
 <meta property="og:description" content="Email support, FAQ, and common troubleshooting topics for Xtend." />
 <meta property="og:url" content="https://getxtend.com/support.html" />
 <meta property="og:image" content="https://getxtend.com/xtend-og.png" />
 <meta property="og:site_name" content="Xtend" />
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Support — Xtend" />
+<meta name="twitter:title" content="Support. Xtend" />
 <meta name="twitter:description" content="Email support, FAQ, and common troubleshooting topics for Xtend." />
 <meta name="twitter:image" content="https://getxtend.com/xtend-og.png" />
-
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="annex.css">
+<link rel="alternate" type="application/rss+xml" title="Xtend Journal" href="https://getxtend.com/blog/feed.xml">
+<link rel="stylesheet" href="site.css">
 <script>
 (function () {
   var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
-  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', m);
+  document.documentElement.style.colorScheme = m;
 })();
 </script>
+<style>
+  main.journal { padding: 132px 0 72px; }
+  .annexe { margin: 0 auto; }
+  .annexe h1 { margin: 10px 0 14px; }
+  .annexe h2 { margin: 2.8rem 0 0.9rem; padding-top: 1.6rem; border-top: 1px solid var(--hair-strong); }
+  .annexe h3 { margin: 1.6rem 0 0.5rem; }
+  .annexe p { margin: 0.85rem 0; }
+  .annexe ul, .annexe ol { margin: 0.85rem 0 0.85rem 1.35rem; color: var(--text-2); }
+  .annexe li { line-height: 1.6; margin: 0.45rem 0; }
+  .annexe li::marker { color: var(--text-3); }
+  .annexe pre { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 0.95rem 1.15rem; overflow-x: auto; margin: 1rem 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.8rem; line-height: 1.6; color: var(--text-2); }
+  .annexe code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.85em;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 5px; padding: 0.1em 0.35em; }
+  .annexe pre code { border: none; background: none; padding: 0; }
+  .annexe .label { display: block; font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 11px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 6px; }
+  .annexe .effective { font-size: 12px; color: var(--text-3); margin-bottom: 34px; display: block;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .annexe .lede { margin: 0 0 0.6rem; }
+  .annexe hr { border: 0; border-top: 1px solid var(--hair-strong); margin: 2.4rem 0; }
+  .annexe .cta-row { display: flex; gap: 12px; flex-wrap: wrap; margin: 1.4rem 0 0.5rem; }
+  .annexe .btn-primary { background: var(--accent); color: var(--accent-ink); border-radius: 10px;
+    padding: 12px 20px; text-decoration: none; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13.5px; display: inline-flex; gap: 8px; align-items: center; }
+  .annexe .btn-ghost { color: var(--text); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 12px 20px; text-decoration: none; font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 13.5px; display: inline-flex; gap: 8px; align-items: center; }
+  .annexe .btn-ghost:hover { border-color: var(--text-3); }
+  .annexe .credit { padding: 20px 0; border-top: 1px solid var(--hair); }
+  .annexe .credit:first-of-type { border-top: 0; }
+  .annexe .credit-name { font-weight: 600; color: var(--text); display: inline; }
+  .annexe .credit-license { display: inline-block; margin-left: 10px; font-size: 11px; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--accent); border: 1px solid var(--hair-strong);
+    border-radius: 5px; padding: 2px 7px; vertical-align: 2px; font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .annexe .credit-desc { color: var(--text-2); margin-top: 6px; }
+  .annexe .back { display: inline-block; margin-top: 46px; font-family: "IBM Plex Mono", ui-monospace, monospace;
+    font-size: 13.5px; color: var(--text-2); text-decoration: none; }
+  .annexe .back:hover { color: var(--text); }
+  .annexe .qa { margin: 1.2rem 0; }
+  .annexe .q { font-weight: 600; color: var(--text); }
+  .annexe .ans { color: var(--text-2); }
+</style>
 </head>
-<body>
+<body id="top">
 
-<nav>
-  <div class="nav-inner">
-    <a href="index.html"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+<nav id="nav">
+  <div class="nav-in">
+    <a href="index.html" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+    <div class="nav-r">
+      <a href="blog/index.html" class="link">Journal</a>
+      <a href="index.html#capabilities" class="link">Capabilities</a>
+      <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-sm btn-fill">App Store</a>
+    </div>
   </div>
 </nav>
 
-<div class="container">
-  <span class="label">Support</span>
+<main class="journal"><div class="wrap">
+<article class="annexe">
+<span class="label">Support</span>
   <h1>Need a <em>hand?</em></h1>
-  <p class="lede">Xtend is built and maintained by one person. Reach out directly — most questions are answered within a day or two.</p>
+  <p class="lede">Xtend is built and maintained by one person. Reach out directly, most questions are answered within a day or two.</p>
 
   <div class="cta-row">
     <a href="mailto:maouizerat@gmail.com?subject=Xtend%20%E2%80%94%20support" class="btn btn-primary">Email support</a>
@@ -50,20 +95,20 @@
 
   <h2>Common topics</h2>
   <ul>
-    <li><strong>Setup &amp; pairing</strong> — sign in with the same Apple ID on both your iPhone and your Mac. The iPhone finds the Mac registered under your account, so pairing works the same on your Wi-Fi and off it — remote access is not the paid feature. On the same Wi-Fi the two connect directly to each other whenever they can.</li>
-    <li><strong>Account &amp; device security</strong> — every signaling and TURN request is authenticated with a Sign-in-with-Apple-backed session token. Only the device signed in to your Apple ID can join your session. WebRTC media is end-to-end encrypted (DTLS-SRTP); even the TURN relay sees encrypted bytes only.</li>
-    <li><strong>Mac permission prompts</strong> — Screen Recording and Accessibility are required for the Mac companion to capture the simulator and forward touch events.</li>
-    <li><strong>Command approvals</strong> — Xtend does not decide what your agent is allowed to run. Your agent's own permission rules do, reading the same <code>~/.claude/settings.json</code> you already use, so a command behaves on the phone exactly as it would in Terminal on that Mac. Anything not already allowed comes to your phone as an approval; when you allow it there, the decision is written to the project's <code>.claude/settings.local.json</code>, so it applies at your desk too. If you are approving more than you expect, check that file and your global settings.</li>
-    <li><strong>Connection drops</strong> — most often caused by Wi-Fi roaming or VPNs. The app retries automatically. Also check that no other device is holding the session: for now Xtend supports one active connection at a time, so make sure your Mac isn't paired with a second iPhone and your iPhone isn't connected to another Mac.</li>
-    <li><strong>Build / scheme detection</strong> — the Mac runs <code>xcodebuild -list</code> on your <code>.xcodeproj</code>; if no schemes appear, open the project in Xcode at least once first.</li>
-    <li><strong>Terminal session issues</strong> — sessions live as long as the Mac companion is running; quitting the menu-bar app ends them.</li>
+    <li><strong>Setup &amp; pairing</strong>, sign in with the same Apple ID on both your iPhone and your Mac. The iPhone finds the Mac registered under your account, so pairing works the same on your Wi-Fi and off it, remote access is not the paid feature. On the same Wi-Fi the two connect directly to each other whenever they can.</li>
+    <li><strong>Account &amp; device security</strong>, every signaling and TURN request is authenticated with a Sign-in-with-Apple-backed session token. Only the device signed in to your Apple ID can join your session. WebRTC media is end-to-end encrypted (DTLS-SRTP); even the TURN relay sees encrypted bytes only.</li>
+    <li><strong>Mac permission prompts</strong>. Screen Recording and Accessibility are required for the Mac companion to capture the simulator and forward touch events.</li>
+    <li><strong>Command approvals</strong>. Xtend does not decide what your agent is allowed to run. Your agent's own permission rules do, reading the same <code>~/.claude/settings.json</code> you already use, so a command behaves on the phone exactly as it would in Terminal on that Mac. Anything not already allowed comes to your phone as an approval; when you allow it there, the decision is written to the project's <code>.claude/settings.local.json</code>, so it applies at your desk too. If you are approving more than you expect, check that file and your global settings.</li>
+    <li><strong>Connection drops</strong>, most often caused by Wi-Fi roaming or VPNs. The app retries automatically. Also check that no other device is holding the session: for now Xtend supports one active connection at a time, so make sure your Mac isn't paired with a second iPhone and your iPhone isn't connected to another Mac.</li>
+    <li><strong>Build / scheme detection</strong>, the Mac runs <code>xcodebuild -list</code> on your <code>.xcodeproj</code>; if no schemes appear, open the project in Xcode at least once first.</li>
+    <li><strong>Terminal session issues</strong>, sessions live as long as the Mac companion is running; quitting the menu-bar app ends them.</li>
   </ul>
 
   <h2>When you email</h2>
   <p>Include your iOS &amp; macOS version, the build numbers from each app (visible in the menu bar app's About panel), and a short description of what you tried. The more detail, the faster a fix lands. We aim to respond within 2 business days.</p>
 
   <h2>Bug report template</h2>
-  <p>Copy this into your email — it speeds up the back-and-forth:</p>
+  <p>Copy this into your email, it speeds up the back-and-forth:</p>
   <pre class="bug-template">**What happened**
 …
 
@@ -92,20 +137,80 @@
   <p>iOS 18.2 or later · macOS 15.2 or later · Xcode 16.2 or later.</p>
 
   <a href="index.html" class="back">← Back to Xtend</a>
-</div>
+</article>
+</div></main>
 
-<footer class="site-footer">
-  <div class="site-footer-inner">
-    <span>© 2026 Xtend · Made in Israel</span>
-    <div class="site-footer-links">
-      <a href="privacy.html">Privacy</a>
-      <a href="terms.html">Terms</a>
-      <a href="support.html">Support</a>
-      <a href="acknowledgements.html">Acknowledgements</a>
+<footer>
+  <div class="wrap">
+    <div class="foot rv in">
+      <div class="foot-brand">
+        <a href="index.html" class="brand"><img src="app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="index.html#capabilities">Capabilities</a>
+        <a href="index.html#pricing">Pricing</a>
+        <a href="index.html#faq">FAQ</a>
+        <a href="index.html#download">Download</a>
+        <a href="blog/index.html">Journal</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Legal</span>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="acknowledgements.html">Acknowledgements</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="foot-meta mono rv in">
+      <div class="themes" id="themes" role="radiogroup" aria-label="Theme">
+        <button data-set="system" aria-label="System theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></button>
+        <button data-set="light" aria-label="Light theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+        <button data-set="dark" aria-label="Dark theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg></button>
+      </div>
+      <span>Xtend © 2026</span>
+      <span>Created by Mendy Aouizerat</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
     </div>
   </div>
 </footer>
 
-<!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "b44e30b5be214629930561007feb48bb"}'></script><!-- End Cloudflare Web Analytics -->
+<script>
+(function () {
+  'use strict';
+  var KEY = 'xtend-theme-mode';
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function osTheme() { return mq && mq.matches ? 'light' : 'dark'; }
+  function readMode() { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } }
+  function apply(mode) {
+    var r = mode === 'system' ? osTheme() : mode;
+    document.documentElement.setAttribute('data-theme', r);
+    document.documentElement.style.colorScheme = r;
+    var btns = document.querySelectorAll('.themes button');
+    for (var i = 0; i < btns.length; i++)
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-set') === mode ? 'true' : 'false');
+  }
+  apply(readMode());
+  var seg = document.getElementById('themes');
+  if (seg) seg.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-set]');
+    if (!b) return;
+    var m = b.getAttribute('data-set');
+    try { localStorage.setItem(KEY, m); } catch (err) {}
+    apply(m);
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (readMode() === 'system') apply('system'); });
+  var nav = document.getElementById('nav');
+  function onScroll() { if (nav) nav.classList.toggle('stuck', (window.scrollY || 0) > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+
 </body>
 </html>

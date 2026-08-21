@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<channel>
+  <title>Xtend Journal</title>
+  <link>https://getxtend.com/blog/</link>
+  <description>Engineering notes from building Xtend: terminals, PTYs, WebRTC, SwiftTerm, StoreKit, the parts nobody documents.</description>
+  <language>en</language>
+  <atom:link href="https://getxtend.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
+
+  <item>
+    <title>Why Claude Code garbles when you rotate your phone</title>
+    <link>https://getxtend.com/blog/terminal-state-you-cant-replay.html</link>
+    <guid>https://getxtend.com/blog/terminal-state-you-cant-replay.html</guid>
+    <pubDate>Fri, 21 Aug 2026 09:00:00 +0300</pubDate>
+    <description>Two weeks on column widths, one measurement that ended them, and the thing every "attach to a running session" implementation gets wrong. PTYs, SIGWINCH, width-blind scrollback, APC markers, two SwiftTerm bugs, and why the fix was to fork instead of mirror.</description>
+  </item>
+
+</channel>
+</rss>

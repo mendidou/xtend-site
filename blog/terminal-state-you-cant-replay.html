@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Claude Code garbles when you rotate your phone · Xtend Journal</title>
+<meta name="description" content="Two weeks on column widths, one measurement that ended them, and the thing every 'attach to a running session' implementation gets wrong.">
+<meta property="og:type" content="article" />
+<meta property="og:title" content="Why Claude Code garbles when you rotate your phone" />
+<meta property="og:description" content="Two weeks on column widths, one measurement that ended them, and the thing every 'attach to a running session' implementation gets wrong." />
+<meta property="og:url" content="https://getxtend.com/blog/terminal-state-you-cant-replay.html" />
+<meta property="og:image" content="https://getxtend.com/xtend-og.png" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate" type="application/rss+xml" title="Xtend Journal" href="https://getxtend.com/blog/feed.xml">
+<link rel="stylesheet" href="../site.css">
+<script>
+(function () {
+  var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', m);
+  document.documentElement.style.colorScheme = m;
+})();
+</script>
+<style>
+  main.journal { padding: 132px 0 72px; }
+  .post { margin: 0 auto; }
+  .post h1 { margin: 10px 0 14px; }
+  .post .kick { display: block; margin: 3rem 0 0.35rem; }
+  .post h2 { margin: 0 0 0.9rem; }
+  .post p { margin: 0.95rem 0; }
+  .post ol, .post ul { margin: 0.95rem 0 0.95rem 1.35rem; color: var(--text-2); }
+  .post li { line-height: 1.65; margin: 0.45rem 0; }
+  .post li::marker { color: var(--text-3); }
+  .post pre { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 0.95rem 1.15rem; overflow-x: auto; margin: 1.15rem 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .post code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.85em;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 5px; padding: 0.1em 0.35em; }
+  .post pre code { border: none; background: none; padding: 0; font-size: inherit; }
+  .post .lede { margin: 0 0 1rem; }
+  .postmeta { margin: 0; }
+  .postmeta a { color: inherit; }
+
+  /* ===== animated figures: inline SVG so they inherit the theme ===== */
+  .fig { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 12px;
+    padding: 20px 20px 8px; margin: 1.6rem 0; }
+  
+  .fig svg { width: 100%; height: auto; display: block; }
+  .fig .cap { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.72rem;
+    letter-spacing: 0.06em; color: var(--text-3); text-transform: uppercase; padding: 10px 2px 8px; }
+  .fig text { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .fig .t  { fill: var(--text); font-size: 13px; }
+  .fig .t2 { fill: var(--text-2); font-size: 13px; }
+  .fig .t3 { fill: var(--text-3); font-size: 11.5px; letter-spacing: 0.05em; }
+  .fig .ta { fill: var(--accent); font-size: 13px; }
+  .fig .box { fill: var(--bg); stroke: var(--hair-strong); }
+  .fig .ln  { stroke: var(--hair-strong); }
+  .fig .lna { stroke: var(--accent); }
+
+  /* figures: nothing essential is ever hidden. The pulse points at what is
+     already drawn; the fig-3 branch draws once at page load, well before it
+     scrolls into view, and reduced-motion shows it complete. */
+  @keyframes pulseBad { 0% { opacity: 0.45; } 50% { opacity: 1; } 100% { opacity: 0.45; } }
+  .fig .bad-pulse { animation: pulseBad 2.4s ease-in-out 3; }
+  @keyframes drawOnce { from { stroke-dashoffset: 260; } to { stroke-dashoffset: 0; } }
+  .figC .branch { stroke-dasharray: 260; stroke-dashoffset: 0; animation: drawOnce 1.6s ease-out 1 both; }
+  @media (prefers-reduced-motion: reduce) {
+    .fig .bad-pulse, .figC .branch { animation: none; opacity: 1; stroke-dashoffset: 0; }
+  }
+</style>
+</head>
+<body id="top">
+
+<nav id="nav">
+  <div class="nav-in">
+    <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+    <div class="nav-r">
+      <a href="index.html" class="link">Journal</a>
+      <a href="../index.html#capabilities" class="link">Capabilities</a>
+      <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-sm btn-fill">App Store</a>
+    </div>
+  </div>
+</nav>
+
+<main class="journal"><div class="wrap">
+<article class="post">
+
+<span class="mono postmeta rv in">2026-08-21 · <a href="https://www.linkedin.com/in/mendy-aouizerat/">MENDY AOUIZERAT</a> · SOLO DEV, I BUILD <a href="../index.html">XTEND</a></span>
+<h1 class="rv in">Why Claude Code garbles when you rotate your phone</h1>
+<p class="lede rv in d1">Two weeks on column widths, one measurement that ended them, and the
+thing every "attach to a running session" implementation gets wrong.</p>
+
+<p>I have a Claude Code session running on my Mac, mirrored live on my phone. I rotate the phone. The screen turns into two columns of interleaved garbage. I tap a button in the TUI, the app's text interface. Nothing happens.</p>
+
+<p>Neither of those is a rendering bug. Chasing them took two weeks, one full revert, and one measurement, and on the way the same root cause quietly corrupted session files on disk. Almost none of it is written down anywhere, so here it is.</p>
+
+<span class="mono kick rv">01 · PRIOR ART</span>
+
+<h2 class="rv">What already exists, honestly</h2>
+
+<ul><li><strong>ssh + tmux is the right answer for most people.</strong> Blink or Secure ShellFish, Tailscale, done. If that covers you, stop reading and go set it up.</li><li><strong>VS Code Remote / Codespaces / Cursor</strong>: they solve editing, not a running Simulator, and a full editor on a phone screen is misery.</li><li><strong>VNC / RDP</strong>: solves everything visually, at desktop-UI-on-a-phone prices.</li><li><strong>Hosted agents</strong>: fine until you need <code>xcodebuild</code>, a Simulator, or a certificate that lives on your machine.</li><li><strong>reptyr</strong>: steals a running process into a new terminal with ptrace, the debugger interface. Prior art for everything with "attach" in the name.</li><li><strong>ACP</strong> (the <a href="https://agentclientprotocol.com">Agent Client Protocol</a>, JSON-RPC between editor and agent; Zed 2025, JetBrains and Neovim since): for an agent that speaks it, every problem below disappears. I use it, and adding an agent is a config entry, not code. But it gives you the agent, not the machine: no builds, no logs, no debugger, no tool without an adapter. The PTY, the pseudo-terminal every command-line program speaks, is the one interface everything has.</li></ul>
+
+<p>I wanted the machine, so I was stuck with the PTY.</p>
+
+<span class="mono kick rv">02 · PTY</span>
+
+<h2 class="rv">The thirty seconds of PTY you need</h2>
+
+<p>Spawn a process with pipes and you get its output but no terminal: <code>isatty()</code> is false, <code>vim</code> won't draw, and there's no window size, because a pipe doesn't have one. It's the same reason <code>git log</code> gives you a pager in a terminal and a raw dump when piped into a file. <code>forkpty()</code> creates the real thing. The kernel then owns a window size for that tty, and when it changes it sends the program <code>SIGWINCH</code>, "window changed". That signal is the only reason <code>vim</code> knows to redraw. The rest of the TTY story is told better than I'll ever tell it in <a href="https://www.linusakesson.net/programming/tty/">The TTY demystified</a>.</p>
+
+<p>One debugging trick worth stealing: run <code>stty -a</code> on the PTY's own tty. If it reports the right rows and columns, your wrapper is correct and the bug is above it. Mine was above it.</p>
+
+<span class="mono kick rv">03 · WIDTH</span>
+
+<h2 class="rv">The scrollback has no columns</h2>
+
+<p>A scrollback (the history above the visible screen) is raw bytes, and bytes have no width. Look at the figure: Claude's spinner repaints itself by moving the cursor up two rows from the bottom, over the command line, onto its own row. Replay the same bytes on a narrower grid and the command wraps onto two rows, so up-two now lands inside the wrapped command and the repaint writes a second spinner mid-text. Two texts on one row. That's the garble.</p>
+
+<figure class="fig figA rv">
+<svg viewBox="0 0 880 360" role="img" aria-label="Left: painted at 40 columns, the spinner sits two rows above the cursor and repaints itself with cursor-up-2, correctly. Right: the same bytes replayed at 18 columns wrap the command onto two rows, so cursor-up-2 lands inside the wrapped command and the repaint writes a second spinner mid-text.">
+  <text x="24" y="26" class="t3">1 · PAINTED AT 40 COLUMNS · CORRECT</text>
+  <rect x="24" y="38" width="400" height="150" rx="8" class="box"/>
+  <line x1="24" y1="75" x2="424" y2="75" class="ln"/>
+  <line x1="24" y1="112" x2="424" y2="112" class="ln"/>
+  <line x1="24" y1="149" x2="424" y2="149" class="ln"/>
+  <text x="38" y="62"  class="t">Building the app</text>
+  <text x="38" y="99"  class="t">⠙ compiling…</text>
+  <text x="38" y="136" class="t">❯ xcodebuild -scheme Xtend</text>
+  <text x="38" y="173" class="t">done</text>
+  <text x="24" y="218" class="t2">The spinner repaints itself with "cursor up 2"</text>
+  <text x="24" y="243" class="t2">from the bottom row. Two rows up is the spinner.</text>
+  <text x="24" y="268" class="t2">Correct.</text>
+
+  <text x="456" y="26" class="t3">2 · SAME BYTES, REPLAYED AT 18 COLUMNS · GARBLED</text>
+  <rect x="456" y="38" width="400" height="187" rx="8" class="box"/>
+  <line x1="456" y1="75" x2="856" y2="75" class="ln"/>
+  <line x1="456" y1="112" x2="856" y2="112" class="ln"/>
+  <line x1="456" y1="149" x2="856" y2="149" class="ln"/>
+  <line x1="456" y1="186" x2="856" y2="186" class="ln"/>
+  <text x="470" y="62"  class="t">Building the app</text>
+  <text x="470" y="99"  class="t">⠙ compiling…</text>
+  <g class="bad-pulse">
+    <text x="470" y="136" class="ta">⠙ compiling… -sche</text>
+  </g>
+  <text x="470" y="173" class="t">me Xtend</text>
+  <text x="470" y="210" class="t">done</text>
+  <text x="456" y="255" class="t2">The command wrapped onto two rows, so "up 2" now</text>
+  <text x="456" y="280" class="t2">lands inside it. The repaint writes a second</text>
+  <text x="456" y="305" class="ta">spinner mid-command. Two texts on one row.</text>
+
+  <text x="24" y="344" class="ta">The break positions were never in the bytes. They lived in the grid that is gone.</text>
+</svg>
+<figcaption class="cap">FIG 1 · one stream of drawing instructions, two grids. Only one matches the instructions</figcaption>
+</figure>
+
+<p>This is nobody's edge case. Codex merged a <a href="https://github.com/openai/codex/pull/18575">reflow-scrollback-on-resize fix</a> this year. Claude Code's changelog said "Fixed scrollback duplication" in 2.1.116, and <a href="https://github.com/anthropics/claude-code/issues/51828">#51828</a> is open because the symptom came back unchanged four releases in a row, with duplicates still being filed weeks later. When fixes keep not sticking, the cause is usually a layer down.</p>
+
+<p>To replay correctly you have to know where the width changed, which means putting metadata inside a stream that has no place for it. The trick is <strong>APC sequences</strong>: <code>ESC _ payload ESC \</code>, an escape family with one useful rule, a terminal that doesn't understand the payload has to swallow it silently. So:</p>
+
+<pre><code>ESC _ Xtend;width=90x30 ESC \</code></pre>
+
+<p>travels inside the stream, at the right position by construction, invisible to everyone else. Kitty's graphics protocol rides the same mechanism. One constraint I'd keep if I did it again: never write markers into the stored history, materialise them at replay time. Storage stays pure bytes, and old history survives any format change.</p>
+
+<span class="mono kick rv">04 · THE MEASUREMENT</span>
+
+<h2 class="rv">The measurement that killed the project</h2>
+
+<p>I built all of that to re-wrap history at any width. Then, in early August, I recorded real Claude Code sessions through tmux at three widths and looked at what the terminal emulator (the component turning bytes into a grid) actually held:</p>
+
+<p><strong>Claude ends every line it prints with a real newline. 252 real rows, zero soft wraps (lines folded by the terminal, not by the text).</strong></p>
+
+<p>There's nothing to re-wrap. Widening the terminal can never make Claude's output reflow, in my app or in VS Code or in iTerm, because the breaks are in the content, not the layout. Two weeks of reflow machinery, aimed at a property the content doesn't have. What survived is much narrower: it fixes repaint artefacts.</p>
+
+<p>The embarrassing part is that one recording in week one would have shown this. The bug was dramatic, so I went straight to fixing it and never looked at what the content was actually made of.</p>
+
+<span class="mono kick rv">05 · SWIFTTERM</span>
+
+<h2 class="rv">Two SwiftTerm bugs, one Mirror</h2>
+
+<p><a href="https://github.com/migueldeicaza/SwiftTerm">SwiftTerm</a> is the terminal emulator most Swift apps embed. Two behaviours each cost me days:</p>
+
+<ul><li><strong><code>resize()</code> loses the cursor's line tail.</strong> Shrink 90 to 44 columns: every line re-wraps correctly except the one under the cursor. A 60-char line becomes <code>44 + 16</code> normally, just <code>44</code> with the cursor on it. So never resize an emulator holding content you can't lose. Serialise at the current width and let the destination wrap.</li><li><strong>The wrap flag survives overwrites.</strong> Repaint a row in place, which Claude does constantly, and the old continuation flag stays on the new content. Trust it and you weld unrelated rows together. Worth an upstream report.</li></ul>
+
+<p>The flag is also internal, there's no API to read it. Swift's reflection reads it anyway:</p>
+
+<pre><code>let flag = Mirror(reflecting: bufferLine)
+    .children
+    .first { $0.label == "isWrapped" }?
+    .value as? Bool</code></pre>
+
+<p>It's a hack and I treat it as one: safe fallback (zero joins, never wrong joins) and a pinned test that screams if the property gets renamed. And since the flag can lie, there's a shape veto on top: a wrap can only start from a full row. That took bad welds from 9/9 down to 1/9. The last one, a row repainted to exactly full width, can't be told apart from outside.</p>
+
+<span class="mono kick rv">06 · THE THESIS</span>
+
+<h2 class="rv">The thesis: modes are announced once</h2>
+
+<p>Now the dead taps. A terminal is bytes <strong>plus a mode state</strong>, and the state is announced once, at startup, never repeated. Claude Code switches to the alternate screen (the separate full-screen buffer vim-style apps draw on) and turns on mouse reporting in its first bytes, then assumes the terminal remembers forever. (Codex never touches the alternate screen; it repaints a small region in one batched frame, which is why its scroll feels instant.)</p>
+
+<figure class="fig figB rv">
+<svg viewBox="0 0 880 260" role="img" aria-label="At session start the program emits its mode declarations once: alternate screen on, mouse reporting on. Hours of output follow. A reattach replays only the recent part of the stream, so a fresh emulator never sees the declarations, believes the mouse is off, and drops taps.">
+  <text x="24" y="26" class="t3">THE SESSION'S BYTE STREAM, START → NOW</text>
+  <rect x="24" y="38" width="832" height="58" rx="8" class="box"/>
+  <rect x="36"  y="52" width="126" height="30" rx="15" fill="none" stroke="var(--accent)"/>
+  <text x="50" y="72" class="ta">alt-screen on</text>
+  <rect x="174" y="52" width="94" height="30" rx="15" fill="none" stroke="var(--accent)"/>
+  <text x="188" y="72" class="ta">mouse on</text>
+  <text x="290" y="72" class="t2">…hours of ordinary output…</text>
+  <rect x="560" y="42" width="288" height="50" rx="8" fill="none" class="lna" stroke-width="2" stroke-dasharray="6 6"/>
+  <text x="560" y="122" class="t3">↑ WHAT A REATTACH REPLAYS. THE DECLARATIONS ARE OUTSIDE IT</text>
+
+  <rect x="24" y="150" width="400" height="86" rx="8" class="box"/>
+  <text x="38" y="176" class="t">fresh emulator on the phone</text>
+  <text x="38" y="202" class="t2">mouse: off. nobody told it otherwise</text>
+  <g class="bad-pulse"><text x="292" y="202" class="ta">tap → dropped</text></g>
+
+  <rect x="456" y="150" width="400" height="86" rx="8" class="box"/>
+  <text x="470" y="176" class="t">the fix: the host remembers the modes</text>
+  <text x="470" y="202" class="t2">and replays them first, on every reattach</text>
+</svg>
+<figcaption class="cap">FIG 2 · the declarations were emitted once, before the replay window. The fresh emulator never hears them</figcaption>
+</figure>
+
+<p>Open the app on the phone: a fresh emulator replays recent scrollback. The mode declarations happened before that window. The emulator believes the mouse is off, so your tap sends nothing, so the TUI's own buttons are dead. Every naive "attach to a running session" has this bug. It's why reattached tmux sessions and web terminals feel subtly broken in ways nobody can quite articulate.</p>
+
+<p>The fix isn't clever, you just have to know it's needed: <strong>the host remembers the session's mode state and replays it first on every reattach.</strong> Mouse modes, bracketed paste (how pasted text gets marked), alternate screen. It fixed the taps, and it fixed a paste bug I hadn't connected to it.</p>
+
+<p>mosh reached this diagnosis in 2012: synchronize state, don't replay bytes. It also dodged the width problem, by syncing only the visible screen and throwing scrollback away, which is its most famous complaint.</p>
+
+<span class="mono kick rv">07 · THE DETOUR</span>
+
+<h2 class="rv">The detour that corrupted transcripts</h2>
+
+<p>This is the part that cost the most. Claude has an inline mode, <code>CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1</code>: no alternate screen, everything is plain scrollback, so the phone scrolls natively with real iOS physics. I shipped it. It cost me twice.</p>
+
+<p><strong>Cost one: total resize synchronization.</strong> In inline mode the phone re-renders history bytes itself, so the Mac's kernel-side window size and the phone's grid have to agree exactly, at all times, through rotations, pinch zoom and reattaches. Every mismatch is figure 1. In alternate screen mode the TUI repaints itself on every <code>SIGWINCH</code>; the resize problem doesn't vanish, it changes owner.</p>
+
+<p><strong>Cost two, the deal-breaker: corrupted transcripts.</strong> A Claude transcript is a tree, every entry points at its parent, and <code>--resume</code> continues from the last line of the file. My app keeps the phone's claude process alive after you walk away. Continue the session on the Mac and the file grows past that process's head. Fine, until someone types <code>/exit</code> in the stale process. In alternate screen mode that writes nothing. In inline mode it writes a short farewell into the transcript, anchored on the stale head. I pinned it down with a controlled tmux experiment (claude CLI 2.1.220, August 2026): variable set, the farewell gets written; unset, nothing. The file now ends in the past, the next <code>--resume</code> follows it, and everything in between is orphaned on a branch nobody will ever resume. "The phone overwrote my work" was actually a goodbye message grafted onto the wrong node.</p>
+
+<p>I reported it upstream rather than patch around it, since a local workaround means detecting divergence inside someone else's transcript format, and that's a treadmill. Then I reverted, and made non-native scroll good instead, mostly by respecting what the TUI already supports: flicks become mouse-wheel events fed through a per-frame pump with inertia, capped at a few rows per frame because uncapped bursts trigger Claude's own scroll acceleration. Taps become clicks, which resurrected Claude's "jump to bottom" button. Links got underlines so they read as tappable.</p>
+
+<span class="mono kick rv">08 · FORK</span>
+
+<h2 class="rv">Fork, don't mirror</h2>
+
+<p>What I ended up believing: a terminal is the right substrate and the wrong interface for a phone. So the primary view is a chat, structured turns, native scrolling, no raw terminal codes, and the terminal is one tap away when you need it.</p>
+
+<p>Which leaves the question of what happens to the session when that terminal opens. My first design was a mirror, chat and terminal as two synced views of one session. 315 lines of sync machinery, all deleted, because of undocumented CLI behaviour I measured after getting it wrong once:</p>
+
+<pre><code>--print --resume                    original 15 -&gt; 23 lines, NO new file
+--print --resume --fork-session     original stays 23, fork created at 25</code></pre>
+
+<p>Plain <code>--resume</code> appends. Two live processes on one session both append while ignoring each other: silent divergence at write time, and no amount of syncing fixes corruption that happens at the write. <code>--fork-session</code> copies. So the Terminal button runs <code>claude --resume &lt;ref&gt; --fork-session</code>: same history, own transcript, chat untouched.</p>
+
+<figure class="fig figC rv">
+<svg viewBox="0 0 880 210" role="img" aria-label="The chat session continues on its own transcript; tapping Terminal forks a new branch that shares the history up to that point and then writes to its own transcript.">
+  <line x1="40" y1="80" x2="840" y2="80" class="ln" stroke-width="3"/>
+  <circle cx="120" cy="80" r="5" fill="var(--text-3)"/>
+  <circle cx="300" cy="80" r="5" fill="var(--text-3)"/>
+  <circle cx="480" cy="80" r="6" fill="var(--accent)"/>
+  <circle cx="660" cy="80" r="5" fill="var(--text-3)"/>
+  <text x="40" y="56" class="t">chat session: keeps running, untouched</text>
+  <path class="branch lna" d="M 480 80 C 540 80 560 150 640 150 L 830 150" fill="none" stroke-width="3"/>
+  <g class="blabel">
+    <text x="482" y="118" class="ta">tap Terminal → claude --resume &lt;ref&gt; --fork-session</text>
+    <text x="640" y="178" class="t2">terminal: same history, its own transcript</text>
+  </g>
+</svg>
+<figcaption class="cap">FIG 3 · branch instead of sharing, and the concurrency problem disappears</figcaption>
+</figure>
+
+<p>Branch instead of sharing, and there's no concurrency left to manage. One gotcha that's worth an afternoon of your life: the session ref is minted at spawn, but the transcript file only exists after the first completed turn, so resuming a chat that never got a reply fails with "No conversation found". Check the file exists, else launch plain.</p>
+
+<span class="mono kick rv">09 · STILL BROKEN</span>
+
+<h2 class="rv">Still broken</h2>
+
+<ul><li>Hard newlines never re-join on widening. That's the content, not a bug, and it's equally true in VS Code and iTerm. Only re-running the program re-renders it.</li><li><code>/exit</code> typed inside a forked terminal still diverges silently. No handling.</li><li>One weld in nine survives the shape veto. Not fixable from outside SwiftTerm.</li><li>Garbling during a pinch gesture is inherent; it settles with the gesture.</li></ul>
+
+<span class="mono kick rv">10 · LESSONS</span>
+
+<h2 class="rv">Three things I'd tell someone starting</h2>
+
+<ol><li><strong>Measure the content before building machinery for it.</strong> One recording in week one would have saved two weeks.</li><li><strong>The bug is one layer below where it looks.</strong> Garbled text was a storage bug, not rendering. Dead taps were a missing mode declaration, not touch handling.</li><li><strong>When you're building sync between two things, try branching instead.</strong> Every sync bug I deleted couldn't exist in the forked design.</li></ol>
+
+<p>The reflow effort was 3,220 insertions across 18 files, and I reverted all of it before shipping something much smaller that worked. Reverting was the right call even though it stung.</p>
+
+<p>The input side is its own story: touch, the keyboard, and the hidden text field with five thousand ghost characters that makes backspace auto-repeat work. Next article.</p>
+
+</article>
+</div></main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot rv in">
+      <div class="foot-brand">
+        <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="../index.html#capabilities">Capabilities</a>
+        <a href="../index.html#pricing">Pricing</a>
+        <a href="../index.html#faq">FAQ</a>
+        <a href="../index.html#download">Download</a>
+        <a href="index.html">Journal</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Legal</span>
+        <a href="../privacy.html">Privacy</a>
+        <a href="../terms.html">Terms</a>
+        <a href="../acknowledgements.html">Acknowledgements</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="../support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="foot-meta mono rv in">
+      <div class="themes" id="themes" role="radiogroup" aria-label="Theme">
+        <button data-set="system" aria-label="System theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></button>
+        <button data-set="light" aria-label="Light theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+        <button data-set="dark" aria-label="Dark theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg></button>
+      </div>
+      <span>Xtend © 2026</span>
+      <span>Created by Mendy Aouizerat</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'xtend-theme-mode';
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function osTheme() { return mq && mq.matches ? 'light' : 'dark'; }
+  function readMode() { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } }
+  function apply(mode) {
+    var r = mode === 'system' ? osTheme() : mode;
+    document.documentElement.setAttribute('data-theme', r);
+    document.documentElement.style.colorScheme = r;
+    var btns = document.querySelectorAll('.themes button');
+    for (var i = 0; i < btns.length; i++)
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-set') === mode ? 'true' : 'false');
+  }
+  apply(readMode());
+  var seg = document.getElementById('themes');
+  if (seg) seg.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-set]');
+    if (!b) return;
+    var m = b.getAttribute('data-set');
+    try { localStorage.setItem(KEY, m); } catch (err) {}
+    apply(m);
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (readMode() === 'system') apply('system'); });
+
+  var nav = document.getElementById('nav');
+  function onScroll() { if (nav) nav.classList.toggle('stuck', (window.scrollY || 0) > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* reveal-on-scroll, same rhythm as the landing */
+  var els = document.querySelectorAll('.rv:not(.in)');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  } else {
+    els.forEach(function (el) { el.classList.add('in'); });
+  }
+})();
+</script>
+
+</body>
+</html>

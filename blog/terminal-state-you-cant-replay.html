@@ -157,11 +157,11 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p>This is nobody's edge case. Codex merged a <a href="https://github.com/openai/codex/pull/18575">reflow-scrollback-on-resize fix</a> this year. Claude Code's changelog said "Fixed scrollback duplication" in 2.1.116, and <a href="https://github.com/anthropics/claude-code/issues/51828">#51828</a> is open because the symptom came back unchanged four releases in a row, with duplicates still being filed weeks later. When fixes keep not sticking, the cause is usually a layer down.</p>
 
-<p>To replay correctly you have to know where the width changed, which means putting metadata inside a stream that has no place for it. The trick is <strong>APC sequences</strong>: <code>ESC _ payload ESC \</code>, an escape family with one useful rule, a terminal that doesn't understand the payload has to swallow it silently. So:</p>
+<p>To replay correctly you have to know where the width changed. So I needed to slip notes into the stream that my own app reads and every other terminal ignores. Terminals have a built-in rule for exactly this, an old escape-sequence family called <strong>APC</strong>: whatever sits between its start and end markers, a terminal that doesn't understand it must silently throw away. This:</p>
 
 <pre><code>ESC _ Xtend;width=90x30 ESC \</code></pre>
 
-<p>travels inside the stream, at the right position by construction, invisible to everyone else. Kitty's graphics protocol rides the same mechanism. One constraint I'd keep if I did it again: never write markers into the stored history, materialise them at replay time. Storage stays pure bytes, and old history survives any format change.</p>
+<p>travels inside the stream, lands at the right position by construction, invisible everywhere else. Kitty's graphics protocol rides the same rule. One constraint I'd keep if I did it again: the notes are never written into the stored history, they're added at replay time. Storage stays pure bytes, and old history survives any format change.</p>
 
 <span class="mono kick rv">04 · THE MEASUREMENT</span>
 
@@ -181,16 +181,16 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p><a href="https://github.com/migueldeicaza/SwiftTerm">SwiftTerm</a> is the terminal emulator most Swift apps embed. Two behaviours each cost me days:</p>
 
-<ul><li><strong><code>resize()</code> loses the cursor's line tail.</strong> Shrink 90 to 44 columns: every line re-wraps correctly except the one under the cursor. A 60-char line becomes <code>44 + 16</code> normally, just <code>44</code> with the cursor on it. So never resize an emulator holding content you can't lose. Serialise at the current width and let the destination wrap.</li><li><strong>The wrap flag survives overwrites.</strong> Repaint a row in place, which Claude does constantly, and the old continuation flag stays on the new content. Trust it and you weld unrelated rows together. Worth an upstream report.</li></ul>
+<ul><li><strong><code>resize()</code> loses the cursor's line tail.</strong> Shrink 90 to 44 columns: every line re-wraps correctly except the one under the cursor. A 60-char line becomes <code>44 + 16</code> normally, just <code>44</code> with the cursor on it. So never resize an emulator holding content you can't lose. Serialise at the current width and let the destination wrap.</li><li><strong>The wrap flag survives overwrites.</strong> Repaint a row in place, which Claude does constantly, and the old continuation flag stays on the new content. Trust it and you glue unrelated rows together. Worth an upstream report.</li></ul>
 
-<p>The flag is also internal, there's no API to read it. Swift's reflection reads it anyway:</p>
+<p>Why does that flag matter? When I serialise the buffer I have to answer one question per row: is the next row a continuation of this one (one long line the terminal folded), or a separate line? Glue two separate lines together and you've invented text that never existed. SwiftTerm knows the answer, that's the wrap flag, but it's internal, there's no API for it. Swift has a reflection tool, <code>Mirror</code>, that looks inside a value and reads fields the API doesn't expose:</p>
 
 <pre><code>let flag = Mirror(reflecting: bufferLine)
     .children
     .first { $0.label == "isWrapped" }?
     .value as? Bool</code></pre>
 
-<p>It's a hack and I treat it as one: safe fallback (zero joins, never wrong joins) and a pinned test that screams if the property gets renamed. And since the flag can lie, there's a shape veto on top: a wrap can only start from a full row. That took bad welds from 9/9 down to 1/9. The last one, a row repainted to exactly full width, can't be told apart from outside.</p>
+<p>It's a hack and I treat it as one: if the library ever renames the field, my code falls back to gluing nothing (a missing join is ugly, a wrong join is a lie), and a pinned test screams the day that happens. And since the flag itself can be stale, there's a sanity check on top: a fold can only happen on a row that was completely full, so a wrap claimed under a half-empty row is rejected. That took bad glue-ups from 9 out of 9 down to 1 in 9. The last one, a row repainted to exactly full width, can't be told apart from outside.</p>
 
 <span class="mono kick rv">06 · THE THESIS</span>
 
@@ -246,12 +246,12 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p>What I ended up believing: a terminal is the right substrate and the wrong interface for a phone. So the primary view is a chat, structured turns, native scrolling, no raw terminal codes, and the terminal is one tap away when you need it.</p>
 
-<p>Which leaves the question of what happens to the session when that terminal opens. My first design was a mirror, chat and terminal as two synced views of one session. 315 lines of sync machinery, all deleted, because of undocumented CLI behaviour I measured after getting it wrong once:</p>
+<p>Which leaves the question of what happens to the session when that terminal opens. My first design was a mirror, chat and terminal as two synced views of one session. 315 lines of sync machinery, all deleted, because of undocumented CLI behaviour I measured after getting it wrong once. <code>--resume</code> means "continue that conversation file"; the numbers are the file's line count before and after sending one message:</p>
 
 <pre><code>--print --resume                    original 15 -&gt; 23 lines, NO new file
 --print --resume --fork-session     original stays 23, fork created at 25</code></pre>
 
-<p>Plain <code>--resume</code> appends. Two live processes on one session both append while ignoring each other: silent divergence at write time, and no amount of syncing fixes corruption that happens at the write. <code>--fork-session</code> copies. So the Terminal button runs <code>claude --resume &lt;ref&gt; --fork-session</code>: same history, own transcript, chat untouched.</p>
+<p>Plain <code>--resume</code> appends to the same file. Two live processes on one session then both write into it while ignoring each other: the file corrupts at the moment of writing, and no syncing after the fact can repair that. <code>--fork-session</code> copies the conversation instead. So the Terminal button runs <code>claude --resume &lt;ref&gt; --fork-session</code>: same history up to that point, its own file from then on, chat untouched.</p>
 
 <figure class="fig figC rv">
 <svg viewBox="0 0 880 210" role="img" aria-label="The chat session continues on its own transcript; tapping Terminal forks a new branch that shares the history up to that point and then writes to its own transcript.">
@@ -276,7 +276,7 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <h2 class="rv">Still broken</h2>
 
-<ul><li>Hard newlines never re-join on widening. That's the content, not a bug, and it's equally true in VS Code and iTerm. Only re-running the program re-renders it.</li><li><code>/exit</code> typed inside a forked terminal still diverges silently. No handling.</li><li>One weld in nine survives the shape veto. Not fixable from outside SwiftTerm.</li><li>Garbling during a pinch gesture is inherent; it settles with the gesture.</li></ul>
+<ul><li>Hard newlines never re-join on widening. That's the content, not a bug, and it's equally true in VS Code and iTerm. Only re-running the program re-renders it.</li><li><code>/exit</code> typed inside a forked terminal still diverges silently. No handling.</li><li>One bad glue-up in nine survives the full-row check. Not fixable from outside SwiftTerm.</li><li>Garbling during a pinch gesture is inherent; it settles with the gesture.</li></ul>
 
 <span class="mono kick rv">10 · LESSONS</span>
 

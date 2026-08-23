@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>I put 5,000 invisible characters in a text field so backspace would work · Xtend Journal</title>
+<meta name="description" content="Ghost characters, finger slots and a gesture war: four fights with iOS input, from a terminal app that had to win them.">
+<meta property="og:type" content="article" />
+<meta property="og:title" content="I put 5,000 invisible characters in a text field so backspace would work" />
+<meta property="og:description" content="Ghost characters, finger slots and a gesture war: four fights with iOS input, from a terminal app that had to win them." />
+<meta property="og:url" content="https://getxtend.com/blog/five-thousand-invisible-characters.html" />
+<meta property="og:image" content="https://getxtend.com/xtend-og.png" />
+<meta property="og:site_name" content="Xtend" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="alternate" type="application/rss+xml" title="Xtend Journal" href="https://getxtend.com/blog/feed.xml">
+<link rel="stylesheet" href="../site.css">
+<script>
+(function () {
+  var m; try { m = localStorage.getItem('xtend-theme-mode') || 'light'; } catch (e) { m = 'light'; }
+  if (m === 'system') m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', m);
+  document.documentElement.style.colorScheme = m;
+})();
+</script>
+<style>
+  main.journal { padding: 132px 0 72px; }
+  .post { margin: 0 auto; }
+  .post h1 { margin: 10px 0 14px; }
+  .post .kick { display: block; margin: 3rem 0 0.35rem; }
+  .post h2 { margin: 0 0 0.9rem; }
+  .post p { margin: 0.95rem 0; }
+  .post ol, .post ul { margin: 0.95rem 0 0.95rem 1.35rem; color: var(--text-2); }
+  .post li { line-height: 1.65; margin: 0.45rem 0; }
+  .post li::marker { color: var(--text-3); }
+  .post pre { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 10px;
+    padding: 0.95rem 1.15rem; overflow-x: auto; margin: 1.15rem 0;
+    font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6; color: var(--text); }
+  .post code { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.85em;
+    background: var(--surface); border: 1px solid var(--hair); border-radius: 5px; padding: 0.1em 0.35em; }
+  .post pre code { border: none; background: none; padding: 0; font-size: inherit; }
+  .post .lede { margin: 0 0 1rem; }
+  .postmeta { margin: 0; }
+  .postmeta a { color: inherit; }
+
+  /* ===== animated figures: inline SVG so they inherit the theme ===== */
+  .fig { background: var(--surface); border: 1px solid var(--hair-strong); border-radius: 12px;
+    padding: 20px 20px 8px; margin: 1.6rem 0; }
+  
+  .fig svg { width: 100%; height: auto; display: block; }
+  .fig .cap { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 0.72rem;
+    letter-spacing: 0.06em; color: var(--text-3); text-transform: uppercase; padding: 10px 2px 8px; }
+  .fig text { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+  .fig .t  { fill: var(--text); font-size: 13px; }
+  .fig .t2 { fill: var(--text-2); font-size: 13px; }
+  .fig .t3 { fill: var(--text-3); font-size: 11.5px; letter-spacing: 0.05em; }
+  .fig .ta { fill: var(--accent); font-size: 13px; }
+  .fig .box { fill: var(--bg); stroke: var(--hair-strong); }
+  .fig .ln  { stroke: var(--hair-strong); }
+  .fig .lna { stroke: var(--accent); }
+
+  /* figures: nothing essential is ever hidden. The pulse points at what is
+     already drawn; reduced-motion shows everything complete. */
+  /* FIG 1 live erase: a cover grows over the command in character steps
+     (steps(30) = one per erased char, the prompt never erases); the ghost counter swaps in sync.
+     3 cycles then it settles on the final state; reduced-motion shows the
+     final state immediately with nothing hidden. */
+  @keyframes eraseWipe { 0% { transform: scaleX(0); } 55% { transform: scaleX(1); } 100% { transform: scaleX(1); } }
+  .figA .eraseCover { transform-box: fill-box; transform-origin: 100% 50%;
+    animation: eraseWipe 5s steps(30, end) 3; animation-fill-mode: forwards; }
+  @keyframes gcA { 0% { opacity: 1; } 27% { opacity: 1; } 28% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes gcB { 0% { opacity: 0; } 27% { opacity: 0; } 28% { opacity: 1; } 54% { opacity: 1; } 55% { opacity: 0; } 100% { opacity: 0; } }
+  @keyframes gcC { 0% { opacity: 0; } 54% { opacity: 0; } 55% { opacity: 1; } 100% { opacity: 1; } }
+  .figA .gc1 { animation: gcA 5s linear 3 forwards; }
+  .figA .gc2 { animation: gcB 5s linear 3 forwards; }
+  .figA .gc3 { animation: gcC 5s linear 3 forwards; }
+  @keyframes pulseBad { 0% { opacity: 0.45; } 50% { opacity: 1; } 100% { opacity: 0.45; } }
+  .fig .bad-pulse { animation: pulseBad 2.4s ease-in-out 3; }
+  @media (prefers-reduced-motion: reduce) {
+    .fig .bad-pulse { animation: none; opacity: 1; }
+    .figA .eraseCover { display: none; }
+    .figA .gc1, .figA .gc2 { animation: none; opacity: 0; }
+    .figA .gc3 { animation: none; opacity: 1; }
+  }
+</style>
+</head>
+<body id="top">
+
+<nav id="nav">
+  <div class="nav-in">
+    <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+    <div class="nav-r">
+      <a href="index.html" class="link">Journal</a>
+      <a href="../index.html#capabilities" class="link">Capabilities</a>
+      <a href="https://apps.apple.com/app/id6771780750" target="_blank" rel="noopener" class="btn btn-sm btn-fill">App Store</a>
+    </div>
+  </div>
+</nav>
+
+<main class="journal"><div class="wrap">
+<article class="post">
+
+<span class="mono postmeta rv in">2026-08-23 · <a href="https://www.linkedin.com/in/mendy-aouizerat/">MENDY AOUIZERAT</a> · SOLO DEV, I BUILD <a href="../index.html">XTEND</a></span>
+<h1 class="rv in">I put 5,000 invisible characters in a text field so backspace would work</h1>
+<p class="lede rv in d1">Four fights with iOS input, and the absurd tricks that won them: ghost characters, finger slots, and a gesture war.</p>
+
+<p>My app shows a live terminal on the iPhone (the session actually runs on a Mac). I held backspace to clear a long command. One character vanished, then nothing. The keyboard just sat there, repeating into the void.</p>
+
+<p>That was fight one of four. Each one ended with a trick I'd have called ugly a month earlier, and each trick is now load-bearing. This article is the four of them, with the reasoning, because none of it is documented anywhere and all of it applies to any app that isn't a form.</p>
+
+<span class="mono kick rv">01 · PRIOR ART</span>
+
+<h2 class="rv">What already works, honestly</h2>
+
+<ul><li><strong>Hardware keyboards are fine.</strong> UIKit gives you key events for physical keys, with modifiers and repeat. If your users all have a Magic Keyboard, stop reading, you don't have this problem.</li><li><strong>The classic trick exists for one backspace.</strong> The old Stack Overflow answer: put a zero-width space (an invisible character) in a text field so you can detect backspace on an "empty" field once. My whole approach is that hack, industrialized.</li><li><strong><a href="https://github.com/utmapp/UTM">UTM</a> showed the layout pattern.</strong> Pinning the accessory bar (the button row docked above the keyboard) to iOS's keyboard layout guide comes straight from their virtual machine app. Credit where due, I copied it.</li></ul>
+
+<p>What none of that covers, and what this article is about: the software keyboard, held keys, more than one finger, and other people's gestures.</p>
+
+<span class="mono kick rv">02 · THE GHOST FIELD</span>
+
+<h2 class="rv">The ghost field</h2>
+
+<p>The actual problem: on iOS, the software keyboard doesn't send you key events. It edits text fields. "Backspace held down" doesn't exist as an event you can receive; what exists is "a text field with content keeps shrinking". No content, no shrinking, no repeat. A terminal has no text field, so a held backspace is one delete and then silence.</p>
+
+<p>So I gave iOS what it wants: a hidden text field (invisible, no caret, never on screen) that holds the keyboard focus, pre-filled with <strong>5,000 spaces</strong>. The user holds backspace, iOS happily deletes ghost spaces one by one, and each delete fires a callback. In the callback I forward a real delete character (0x7F, what terminals expect) to the shell. iOS thinks it's editing a document. It's actually driving a terminal.</p>
+
+<figure class="fig figA rv">
+<svg viewBox="0 0 880 330" role="img" aria-label="Left panel: the command the user sees, being erased character by character while backspace is held. Right panel: the hidden field iOS is actually editing, its ghost-space counter dropping from 5,000 to 4,970 in step with the erase, one ghost per erased character, the prompt itself never erases, and a delete byte (0x7F) sent to the shell per tick. Below: the refill gate tops the field back up to 5,000 under 200 ghosts, but never within 0.2 seconds of the last delete, because iOS keeps auto-repeating only while the field keeps shrinking.">
+  <text x="24" y="26" class="t3">WHAT THE USER SEES</text>
+  <rect x="24" y="38" width="330" height="96" rx="8" class="box"/>
+  <g>
+    <text x="40" y="76" class="t">$ git commit -m "wip layout fix"</text>
+    <rect class="eraseCover" x="56" y="60" width="240" height="24" fill="var(--bg)"/>
+  </g>
+  <text x="40" y="116" class="t3">BACKSPACE HELD, AUTO-REPEAT</text>
+
+  <text x="395" y="80" class="t2">each backspace</text>
+  <text x="395" y="100" class="t2">tick</text>
+  <line x1="360" y1="86" x2="520" y2="86" class="lna" stroke-width="2"/>
+  <path d="M 520 86 l -9 -5 v 10 z" fill="var(--accent)"/>
+
+  <text x="530" y="26" class="t3">WHAT iOS IS ACTUALLY EDITING</text>
+  <rect x="530" y="38" width="326" height="96" rx="8" class="box"/>
+  <text x="546" y="66" class="t">hidden field, ghost spaces left:</text>
+  <g>
+    <text x="546" y="94" class="ta gc1">5,000</text>
+    <text x="546" y="94" class="ta gc2">4,985</text>
+    <text x="546" y="94" class="ta gc3">4,970</text>
+  </g>
+  <g class="bad-pulse"><text x="640" y="94" class="ta">0x7F to the shell per tick</text></g>
+  <text x="546" y="120" class="t2">the command erases for real, over there</text>
+
+  <rect x="24" y="170" width="832" height="76" rx="8" class="box"/>
+  <text x="40" y="198" class="t">REFILL GATE: below 200 ghosts, top the field back up to 5,000</text>
+  <text x="40" y="226" class="ta">but never within 0.2s of the last delete: iOS keeps repeating only while the field keeps shrinking</text>
+
+  <text x="24" y="290" class="t2">Typed text takes the opposite path: forwarded to the shell, never inserted in the field,</text>
+  <text x="24" y="314" class="t2">so the ghosts stay a pure backspace reservoir.</text>
+</svg>
+<figcaption class="cap">FIG 1 · both panels move together because it's the same event: iOS erases ghosts, the shell receives deletes</figcaption>
+</figure>
+
+<p>The delegate (the object iOS asks before every edit) has a beautiful asymmetry that took me a while to get right:</p>
+
+<ul><li><strong>Backspace</strong> (the callback's replacement string is empty): forward the delete, and return true, so the field really shrinks. The shrinking is what convinces iOS to keep firing the auto-repeat.</li><li><strong>Typed text</strong>: forward it to the shell, and return false, so it never enters the field. The field stays a pure backspace reservoir.</li></ul>
+
+<p>Then the details that each cost a day:</p>
+
+<ul><li><strong>Refill, but never during a burst.</strong> Below 200 remaining ghosts the field gets topped back up to 5,000. But refilling while the user is still holding backspace kills the repeat: iOS decides whether to fire the next tick by checking that the field actually shrank, and a refill makes it grow. So there's a 0.2 second quiet period after the last delete before any refill.</li><li><strong>Return closes the keyboard. Seriously.</strong> UITextField treats Return as "submit the form": it fires its end-of-editing path and resigns the keyboard before the delegate ever sees the newline. In a terminal that means Enter dismisses the keyboard instead of running your command. The fix is intercepting Return, sending a carriage return (0x0D) to the shell myself, and refusing the default so the keyboard stays up.</li><li><strong>A blanket "no menu" swallowed paste.</strong> The field holds focus, so it also receives every edit-menu query. My first version answered no to everything, clean, and ⌘V silently died for the entire terminal. Now it answers yes to exactly one action, paste, and routes the pasted text to the shell instead of into the ghosts.</li><li><strong>Every reappearance re-inflates the field to 5,000</strong>, so a session you come back to behaves like a freshly opened one.</li></ul>
+
+<p>What this buys, for free, because iOS believes it's a real document: long-press backspace repeat, hardware key chords, and dictation. All of it lands in the callback and flows to the shell.</p>
+
+<span class="mono kick rv">03 · TWO FINGERS</span>
+
+<h2 class="rv">SwiftUI drops your second finger</h2>
+
+<p>Fight two. The mirrored screen supports pinch to zoom. I built it with SwiftUI's DragGesture. Pinch: nothing, and no error or warning either.</p>
+
+<p>DragGesture is single-touch. When a second finger lands, it just isn't delivered. There's no multi-touch variant to reach for; if fingers matter, you leave SwiftUI's gesture layer and override the UIKit touch methods yourself.</p>
+
+<p>And one detail matters more than the override: <strong>identity</strong>. My touches cross a network (the tap happens on the iPhone, the touch target runs on the Mac), and a pinch is only a pinch if the receiver can tell finger A from finger B across every move event. So each finger gets a slot: the lowest free number from 0 to 4 on touch-down, kept for the touch's entire lifetime, released on lift. The Mac maps each slot to a stable contact point, and a pinch survives the wire as a pinch.</p>
+
+<figure class="fig figB rv">
+<svg viewBox="0 0 880 274" role="img" aria-label="Two fingers touch the iPhone screen. Each gets a slot: the lowest free number from 0 to 4, kept for the touch's whole lifetime. The events cross the network labeled by slot, so the Mac can rebuild finger A and finger B as two stable contact points and a pinch stays a pinch.">
+  <text x="24" y="26" class="t3">ON THE iPHONE</text>
+  <rect x="24" y="38" width="250" height="150" rx="14" class="box"/>
+  <circle cx="100" cy="100" r="16" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+  <text x="92" y="106" class="ta">0</text>
+  <circle cx="195" cy="140" r="16" fill="none" stroke="var(--accent)" stroke-width="2.5"/>
+  <text x="187" y="146" class="ta">1</text>
+  <text x="40" y="176" class="t2">lowest free slot on touch-down</text>
+
+  <text x="330" y="26" class="t3">THE WIRE</text>
+  <rect x="310" y="38" width="240" height="150" rx="8" class="box"/>
+  <text x="326" y="68" class="t2">down(slot 0, x, y)</text>
+  <text x="326" y="94" class="t2">down(slot 1, x, y)</text>
+  <text x="326" y="120" class="t2">move(slot 0, ...)</text>
+  <text x="326" y="146" class="t2">move(slot 1, ...)</text>
+  <text x="326" y="172" class="t2">up(slot 1)</text>
+
+  <text x="606" y="26" class="t3">ON THE MAC</text>
+  <rect x="586" y="38" width="270" height="150" rx="8" class="box"/>
+  <text x="602" y="68" class="t">slot 0 = contact A</text>
+  <text x="602" y="94" class="t">slot 1 = contact B</text>
+  <text x="602" y="128" class="ta">two stable identities:</text>
+  <text x="602" y="154" class="ta">the pinch survives the network</text>
+
+  <text x="24" y="224" class="t2">A slot is released on lift and reused by the next finger.</text>
+  <text x="24" y="250" class="t2">Identity, not coordinates, is what makes multi-touch work remotely.</text>
+</svg>
+<figcaption class="cap">FIG 2 · two fingers, two slots, one wire</figcaption>
+</figure>
+
+<span class="mono kick rv">04 · THE GESTURE WAR</span>
+
+<h2 class="rv">The gesture war</h2>
+
+<p>Fight three, and the strangest one: the enemies were my own navigation transitions.</p>
+
+<p>I used iOS's zoom transition for opening the terminal (the card grows out of the row you tapped, it's lovely). What nobody tells you: that transition installs its own pan and pinch recognizers (the objects that watch touches for a gesture) on the pushed screen, so that a drag anywhere can start the interactive shrink-to-dismiss. In a terminal, "a drag anywhere" is called scrolling. Every scroll started dismissing the screen, and the mid-flight scaling triggered grid resizes the shell then had to chase.</p>
+
+<p>The fix is a 67-line class whose whole job is diplomacy: while the terminal is on screen, it walks up the view hierarchy, finds the transition's recognizers, and switches them off, then re-enables them on the way out so every other screen keeps its behavior. The zoom-in animation stays; the "any drag dismisses" behavior goes.</p>
+
+<p>Same war, different front: swipe-to-reply in the chat took <strong>six commits</strong> to coexist with everything else that wanted the same finger. It had to not fight vertical scrolling, cede the leading edge to the system back gesture, survive gesture cancellation without a stuck icon, and lock to one direction with a haptic once committed. None of that is the swipe itself; all of it is negotiating with neighbors.</p>
+
+<span class="mono kick rv">05 · TAPPABLE OUTPUT</span>
+
+<h2 class="rv">Making the output tappable</h2>
+
+<p>Half of input is output: the screen has to tell your finger what it can do.</p>
+
+<p>Terminal text with a URL in it looks tappable to nobody. SwiftTerm (the terminal engine I embed) does underline links, but only on hover, and hover doesn't exist on a phone. So tappable URLs carried no visual hint at all. I draw the underlines myself in an overlay layer, scanning the visible rows for URLs. The trap took a day to see: full-screen programs repaint their text in place, no scrolling involved, so refreshing the underlines on layout changes left them stale under new text. The scan has to re-run after every burst of bytes, not just when the view moves.</p>
+
+<p>And the tap itself joined the gesture war. Tapping a link opens it, but double-tap is how you select a word to copy, and the first tap of a double-tap is indistinguishable from a link tap. My first version opened Safari and backgrounded the whole app on tap one of every copy gesture. The fix is one ordering rule: the link tap must wait until the double-tap has officially failed before it fires.</p>
+
+<span class="mono kick rv">06 · FOCUS</span>
+
+<h2 class="rv">Who owns the keyboard</h2>
+
+<p>Fight four is invisible until you have two terminals.</p>
+
+<p>My tabs stay mounted when you switch away (cheaper than rebuilding), which means a terminal you left three tabs ago still exists, still has a window, and still hears keyboard notifications. My reclaim logic used to check "does the hidden field have a window?", which was always yes, so a background terminal would answer a keyboard event from the chat tab and quietly steal the keystrokes. The way I found it: I was typing a message in the chat, and the letters were landing in a shell three tabs away. Two open terminals would fight over the keyboard like cats.</p>
+
+<p>The rule that ended it: only the surface actually on screen may claim the keyboard, and going active never grabs it back automatically, because that would be the same theft in the other direction. The user taps to type. And when a modal covers the terminal, the reclaim stands down entirely until the modal is gone.</p>
+
+<p>One deliberate loss: text selection parks the keyboard focus on the terminal view itself. When you switch tabs mid-selection, I drop the selection on purpose, because coming back to a stale selection toolbar over text you no longer remember selecting is worse.</p>
+
+<span class="mono kick rv">07 · STILL BROKEN</span>
+
+<h2 class="rv">Still broken</h2>
+
+<ul><li>The custom key panel sizes itself to the last keyboard height iOS showed me. There's no API for "how tall is the keyboard right now", so a future keyboard layout change will misalign it until first use.</li><li>The ghost field is a trap, not an API. Every OS update could change how auto-repeat decides to continue, and I'd find out from users, not release notes.</li><li>Selection still lives on the terminal view, not the hidden field. It works, but focus hopping between two views during selection is the part I trust least.</li></ul>
+
+<span class="mono kick rv">08 · LESSONS</span>
+
+<h2 class="rv">Three things I'd tell someone starting</h2>
+
+<ol><li><strong>iOS gives you widgets, not input.</strong> If you need raw input, you don't receive it, you bait a widget into translating it for you. The ghost field is bait.</li><li><strong>When fingers matter, leave SwiftUI's gesture layer.</strong> DragGesture's single-touch limit fails silently, and silent is the expensive kind of failure. The UIKit touch overrides are less pretty and entirely honest.</li><li><strong>A gesture recognizer is never local.</strong> Every screen-level feature you adopt ships recognizers that claim your pixels, and your own features compete with each other too. Budget for the diplomacy, it cost me more commits than the features.</li></ol>
+
+<p>The terminal these tricks serve, and the state problem behind it, is <a href="terminal-state-you-cant-replay.html">the previous article</a>. Next one: how a subscription can follow an account across three devices without the server ever seeing your name.</p>
+
+</article>
+</div></main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot rv in">
+      <div class="foot-brand">
+        <a href="../index.html" class="brand"><img src="../app-icon-128.png" width="22" height="22" alt="">xtend</a>
+        <p>Your dev Mac, in your pocket. An iOS app and a Mac companion, paired by your Apple ID.</p>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Product</span>
+        <a href="../index.html#capabilities">Capabilities</a>
+        <a href="../index.html#pricing">Pricing</a>
+        <a href="../index.html#faq">FAQ</a>
+        <a href="../index.html#download">Download</a>
+        <a href="index.html">Journal</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Legal</span>
+        <a href="../privacy.html">Privacy</a>
+        <a href="../terms.html">Terms</a>
+        <a href="../acknowledgements.html">Acknowledgements</a>
+      </div>
+      <div class="foot-col">
+        <span class="mono">Contact</span>
+        <a href="../support.html">Support</a>
+        <a href="mailto:maouizerat@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="foot-meta mono rv in">
+      <div class="themes" id="themes" role="radiogroup" aria-label="Theme">
+        <button data-set="system" aria-label="System theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="4" width="18" height="13" rx="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line></svg></button>
+        <button data-set="light" aria-label="Light theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg></button>
+        <button data-set="dark" aria-label="Dark theme"><svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"></path></svg></button>
+      </div>
+      <span>Xtend © 2026</span>
+      <span>Created by Mendy Aouizerat</span>
+      <span>Not affiliated with Apple Inc. Xcode is a trademark of Apple Inc.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var KEY = 'xtend-theme-mode';
+  var mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: light)') : null;
+  function osTheme() { return mq && mq.matches ? 'light' : 'dark'; }
+  function readMode() { try { return localStorage.getItem(KEY) || 'light'; } catch (e) { return 'light'; } }
+  function apply(mode) {
+    var r = mode === 'system' ? osTheme() : mode;
+    document.documentElement.setAttribute('data-theme', r);
+    document.documentElement.style.colorScheme = r;
+    var btns = document.querySelectorAll('.themes button');
+    for (var i = 0; i < btns.length; i++)
+      btns[i].setAttribute('aria-pressed', btns[i].getAttribute('data-set') === mode ? 'true' : 'false');
+  }
+  apply(readMode());
+  var seg = document.getElementById('themes');
+  if (seg) seg.addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-set]');
+    if (!b) return;
+    var m = b.getAttribute('data-set');
+    try { localStorage.setItem(KEY, m); } catch (err) {}
+    apply(m);
+  });
+  if (mq && mq.addEventListener) mq.addEventListener('change', function () { if (readMode() === 'system') apply('system'); });
+
+  var nav = document.getElementById('nav');
+  function onScroll() { if (nav) nav.classList.toggle('stuck', (window.scrollY || 0) > 8); }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+
+  /* reveal-on-scroll, same rhythm as the landing */
+  var els = document.querySelectorAll('.rv:not(.in)');
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+      });
+    }, { rootMargin: '0px 0px -8% 0px' });
+    els.forEach(function (el) { io.observe(el); });
+  } else {
+    els.forEach(function (el) { el.classList.add('in'); });
+  }
+})();
+</script>
+
+</body>
+</html>

@@ -8,6 +8,14 @@
   <atom:link href="https://getxtend.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
 
   <item>
+    <title>I put 5,000 invisible characters in a text field so backspace would work</title>
+    <link>https://getxtend.com/blog/five-thousand-invisible-characters.html</link>
+    <guid>https://getxtend.com/blog/five-thousand-invisible-characters.html</guid>
+    <pubDate>Sun, 23 Aug 2026 16:00:00 +0300</pubDate>
+    <description>Ghost characters, finger slots and a gesture war: four fights with iOS input, from a terminal app that had to win them. The hidden UITextField trick for software-keyboard backspace auto-repeat, why SwiftUI's DragGesture drops your second finger, and the recognizer diplomacy nobody budgets for.</description>
+  </item>
+
+  <item>
     <title>Why Claude Code garbles when you rotate your phone</title>
     <link>https://getxtend.com/blog/terminal-state-you-cant-replay.html</link>
     <guid>https://getxtend.com/blog/terminal-state-you-cant-replay.html</guid>

@@ -8,6 +8,14 @@
   <atom:link href="https://getxtend.com/blog/feed.xml" rel="self" type="application/rss+xml"/>
 
   <item>
+    <title>WebRTC on iOS in 2026, without building a video call</title>
+    <link>https://getxtend.com/blog/webrtc-ios-without-video-call.html</link>
+    <guid>https://getxtend.com/blog/webrtc-ios-without-video-call.html</guid>
+    <pubDate>Tue, 25 Aug 2026 16:00:00 +0300</pubDate>
+    <description>Five data channels, no HTTP for app data: using WebRTC as an app transport between iPhone and Mac. The community framework whose macOS slice ships one header, the WebSocket storm, ICE restart vs takeover told apart by a device id, and why sending fewer ICE candidates connects faster.</description>
+  </item>
+
+  <item>
     <title>I put 5,000 invisible characters in a text field so backspace would work</title>
     <link>https://getxtend.com/blog/five-thousand-invisible-characters.html</link>
     <guid>https://getxtend.com/blog/five-thousand-invisible-characters.html</guid>

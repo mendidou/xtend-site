@@ -112,7 +112,7 @@
 
 <h2 class="rv">What already works, honestly</h2>
 
-<ul><li><strong>Hardware keyboards are fine.</strong> UIKit gives you key events for physical keys, with modifiers and repeat. If your users all have a Magic Keyboard, stop reading, you don't have this problem.</li><li><strong>The classic trick exists for one backspace.</strong> The old Stack Overflow answer: put a zero-width space (an invisible character) in a text field so you can detect backspace on an "empty" field once. My whole approach is that hack, industrialized.</li><li><strong><a href="https://github.com/utmapp/UTM">UTM</a> showed the layout pattern.</strong> Pinning the accessory bar (the button row docked above the keyboard) to iOS's keyboard layout guide comes straight from their virtual machine app. Credit where due, I copied it.</li></ul>
+<ul><li><strong>Hardware keyboards are fine.</strong> UIKit gives you key events for physical keys, with modifiers and repeat. If your users all have a Magic Keyboard, stop reading, you don't have this problem.</li><li><strong>The classic trick exists for one backspace.</strong> The old Stack Overflow answer: put a zero-width space (an invisible character) in a text field so you can detect backspace on an "empty" field once. Try it in any UITextField: seed it with one, press backspace on the visibly empty field, and your delegate fires. My whole approach is that hack, industrialized.</li><li><strong><a href="https://github.com/utmapp/UTM">UTM</a> showed the layout pattern.</strong> Pinning the accessory bar (the button row docked above the keyboard) to iOS's keyboard layout guide comes straight from their virtual machine app. Credit where due, I copied it.</li></ul>
 
 <p>What none of that covers, and what this article is about: the software keyboard, held keys, more than one finger, and other people's gestures.</p>
 
@@ -206,7 +206,7 @@
   <text x="602" y="154" class="ta">the pinch survives the network</text>
 
   <text x="24" y="224" class="t2">A slot is released on lift and reused by the next finger.</text>
-  <text x="24" y="250" class="t2">Identity, not coordinates, is what makes multi-touch work remotely.</text>
+  <text x="24" y="250" class="t2">Identity is what crosses the wire: the Mac rebuilds each finger from its slot.</text>
 </svg>
 <figcaption class="cap">FIG 2 · two fingers, two slots, one wire</figcaption>
 </figure>
@@ -215,7 +215,7 @@
 
 <h2 class="rv">The gesture war</h2>
 
-<p>Fight three, and the strangest one: the enemies were my own navigation transitions.</p>
+<p>Fight three, and the strangest one. One finger was tamed, two were wired across the network; what was left was everyone else's fingers, and the enemies were my own navigation transitions.</p>
 
 <p>I used iOS's zoom transition for opening the terminal (the card grows out of the row you tapped, it's lovely). What nobody tells you: that transition installs its own pan and pinch recognizers (the objects that watch touches for a gesture) on the pushed screen, so that a drag anywhere can start the interactive shrink-to-dismiss. In a terminal, "a drag anywhere" is called scrolling. Every scroll started dismissing the screen, and the mid-flight scaling triggered grid resizes the shell then had to chase.</p>
 
@@ -256,6 +256,8 @@
 <h2 class="rv">Three things I'd tell someone starting</h2>
 
 <ol><li><strong>iOS gives you widgets, not input.</strong> If you need raw input, you don't receive it, you bait a widget into translating it for you. The ghost field is bait.</li><li><strong>When fingers matter, leave SwiftUI's gesture layer.</strong> DragGesture's single-touch limit fails silently, and silent is the expensive kind of failure. The UIKit touch overrides are less pretty and entirely honest.</li><li><strong>A gesture recognizer is never local.</strong> Every screen-level feature you adopt ships recognizers that claim your pixels, and your own features compete with each other too. Budget for the diplomacy, it cost me more commits than the features.</li></ol>
+
+<p>And the backspace that started all this? Hold it now: the ghosts shrink, the line clears, and iOS never finds out it's been driving a terminal.</p>
 
 <p>The terminal these tricks serve, and the state problem behind it, is <a href="terminal-state-you-cant-replay.html">the previous article</a>. Next one: how a subscription can follow an account across three devices without the server ever seeing your name.</p>
 

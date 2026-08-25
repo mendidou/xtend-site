@@ -94,13 +94,13 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p>I have a Claude Code session running on my Mac, mirrored live on my phone. I rotate the phone. The screen turns into two columns of interleaved garbage. I tap a button in the TUI, the app's text interface. Nothing happens.</p>
 
-<p>Neither of those is a rendering bug. Chasing them took two weeks, one full revert, and one measurement, and on the way the same root cause quietly corrupted session files on disk. Almost none of it is written down anywhere, so here it is.</p>
+<p>Neither of those is a rendering bug. Chasing them took two weeks, one full revert, and one measurement, and on the way the same root cause quietly corrupted session files on disk. The whole story is one fact wearing three disguises: <strong>a byte stream is not a session.</strong> The width, the modes, the transcript head, everything that gives the bytes meaning, lives outside them and doesn't travel. Almost none of it is written down anywhere, so here it is.</p>
 
 <span class="mono kick rv">01 · PRIOR ART</span>
 
 <h2 class="rv">What already exists, honestly</h2>
 
-<ul><li><strong>ssh + tmux is the right answer for most people.</strong> Blink or Secure ShellFish, Tailscale, done. If that covers you, stop reading and go set it up.</li><li><strong>VS Code Remote / Codespaces / Cursor</strong>: they solve editing, not a running Simulator, and a full editor on a phone screen is misery.</li><li><strong>VNC / RDP</strong>: solves everything visually, at desktop-UI-on-a-phone prices.</li><li><strong>Hosted agents</strong>: fine until you need <code>xcodebuild</code>, a Simulator, or a certificate that lives on your machine.</li><li><strong>reptyr</strong>: steals a running process into a new terminal with ptrace, the debugger interface. Prior art for everything with "attach" in the name.</li><li><strong>ACP</strong> (the <a href="https://agentclientprotocol.com">Agent Client Protocol</a>, JSON-RPC between editor and agent; Zed 2025, JetBrains and Neovim since): for an agent that speaks it, every problem below disappears. I use it, and adding an agent is a config entry, not code. But it gives you the agent, not the machine: no builds, no logs, no debugger, no tool without an adapter. The PTY, the pseudo-terminal every command-line program speaks, is the one interface everything has.</li></ul>
+<ul><li><strong>ssh + tmux is the right answer for most people.</strong> Blink or Secure ShellFish, Tailscale, done. If that covers you, stop reading and go set it up.</li><li><strong>VS Code Remote / Codespaces / Cursor</strong>: they solve editing, not a running Simulator, and a full editor on a phone screen is misery.</li><li><strong>VNC / RDP</strong>: solves everything visually, at desktop-UI-on-a-phone prices.</li><li><strong>Hosted agents</strong>: fine until you need <code>xcodebuild</code>, a Simulator, or a certificate that lives on your machine.</li><li><strong>reptyr</strong>: steals a running process into a new terminal with ptrace, the debugger interface. Prior art for everything with "attach" in the name.</li><li><strong>ACP</strong> (the <a href="https://agentclientprotocol.com">Agent Client Protocol</a>, JSON-RPC between editor and agent; Zed 2025, JetBrains and Neovim since): for an agent that speaks it, every problem below disappears. I use it, and adding an agent is a config entry, not code. But it gives you the agent, not the machine: no builds, no logs, no debugger. The PTY, the pseudo-terminal every command-line program speaks, is the one interface everything has.</li></ul>
 
 <p>I wanted the machine, so I was stuck with the PTY.</p>
 
@@ -179,11 +179,11 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <h2 class="rv">Two SwiftTerm bugs, one Mirror</h2>
 
-<p><a href="https://github.com/migueldeicaza/SwiftTerm">SwiftTerm</a> is the terminal emulator most Swift apps embed. Two behaviours each cost me days:</p>
+<p>So the reflow machinery died. What survived, the repaint fix, still had to read the emulator's buffer correctly, and that's where the next two bugs lived. <a href="https://github.com/migueldeicaza/SwiftTerm">SwiftTerm</a> is the terminal emulator most Swift apps embed. Two behaviours each cost me days:</p>
 
 <ul><li><strong><code>resize()</code> loses the cursor's line tail.</strong> Shrink 90 to 44 columns: every line re-wraps correctly except the one under the cursor. A 60-char line becomes <code>44 + 16</code> normally, just <code>44</code> with the cursor on it. So never resize an emulator holding content you can't lose. Serialise at the current width and let the destination wrap.</li><li><strong>The wrap flag survives overwrites.</strong> Repaint a row in place, which Claude does constantly, and the old continuation flag stays on the new content. Trust it and you glue unrelated rows together. Worth an upstream report.</li></ul>
 
-<p>Why does that flag matter? When I serialise the buffer I have to answer one question per row: is the next row a continuation of this one (one long line the terminal folded), or a separate line? Glue two separate lines together and you've invented text that never existed. SwiftTerm knows the answer, that's the wrap flag, but it's internal, there's no API for it. Swift has a reflection tool, <code>Mirror</code>, that looks inside a value and reads fields the API doesn't expose:</p>
+<p>Why does that flag matter? Serialising the buffer asks one question per row: is the next row a continuation (one long line the terminal folded), or a separate line? Glue two separate lines together and you've invented text that never existed. SwiftTerm knows, that's the wrap flag, but it's internal, no API. Swift's reflection tool, <code>Mirror</code>, reads fields an API doesn't expose:</p>
 
 <pre><code>let flag = Mirror(reflecting: bufferLine)
     .children
@@ -234,11 +234,11 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p>This is the part that cost the most. Claude has an inline mode, <code>CLAUDE_CODE_DISABLE_ALTERNATE_SCREEN=1</code>: no alternate screen, everything is plain scrollback, so the phone scrolls natively with real iOS physics. I shipped it. It cost me twice.</p>
 
-<p><strong>Cost one: total resize synchronization.</strong> In inline mode the phone re-renders history bytes itself, so the Mac's kernel-side window size and the phone's grid have to agree exactly, at all times, through rotations, pinch zoom and reattaches. Every mismatch is figure 1. In alternate screen mode the TUI repaints itself on every <code>SIGWINCH</code>; the resize problem doesn't vanish, it changes owner.</p>
+<p><strong>Cost one: total resize synchronization.</strong> In inline mode the phone re-renders history bytes itself, so the Mac's kernel-side window size and the phone's grid must agree exactly through every rotation, pinch and reattach. Every mismatch is figure 1. In alternate screen the TUI repaints itself on each <code>SIGWINCH</code>; the problem doesn't vanish, it changes owner.</p>
 
 <p><strong>Cost two, the deal-breaker: corrupted transcripts.</strong> A Claude transcript is a tree, every entry points at its parent, and <code>--resume</code> continues from the last line of the file. My app keeps the phone's claude process alive after you walk away. Continue the session on the Mac and the file grows past that process's head. Fine, until someone types <code>/exit</code> in the stale process. In alternate screen mode that writes nothing. In inline mode it writes a short farewell into the transcript, anchored on the stale head. I pinned it down with a controlled tmux experiment (claude CLI 2.1.220, August 2026): variable set, the farewell gets written; unset, nothing. The file now ends in the past, the next <code>--resume</code> follows it, and everything in between is orphaned on a branch nobody will ever resume. "The phone overwrote my work" was actually a goodbye message grafted onto the wrong node.</p>
 
-<p>I reported it upstream rather than patch around it, since a local workaround means detecting divergence inside someone else's transcript format, and that's a treadmill. Then I reverted, and made non-native scroll good instead, mostly by respecting what the TUI already supports: flicks become mouse-wheel events fed through a per-frame pump with inertia, capped at a few rows per frame because uncapped bursts trigger Claude's own scroll acceleration. Taps become clicks, which resurrected Claude's "jump to bottom" button. Links got underlines so they read as tappable.</p>
+<p>I reported it upstream rather than patch around it, since a local workaround means detecting divergence inside someone else's transcript format, and that's a treadmill. Then I reverted, and made non-native scroll good instead: flicks become mouse-wheel events with inertia, capped at a few rows per frame because uncapped bursts trigger Claude's own scroll acceleration; taps become clicks, which resurrected Claude's "jump to bottom" button; links got underlines so they read as tappable.</p>
 
 <span class="mono kick rv">08 · FORK</span>
 
@@ -246,7 +246,7 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <p>What I ended up believing: a terminal is the right substrate and the wrong interface for a phone. So the primary view is a chat, structured turns, native scrolling, no raw terminal codes, and the terminal is one tap away when you need it.</p>
 
-<p>Which leaves the question of what happens to the session when that terminal opens. My first design was a mirror, chat and terminal as two synced views of one session. 315 lines of sync machinery, all deleted, because of undocumented CLI behaviour I measured after getting it wrong once. <code>--resume</code> means "continue that conversation file"; the numbers are the file's line count before and after sending one message:</p>
+<p>What happens to the session when that terminal opens? My first design was a mirror, chat and terminal as two synced views of one session: 315 lines of sync machinery, all deleted, because of undocumented CLI behaviour I measured after getting it wrong once. <code>--resume</code> means "continue that conversation file"; the numbers are the file's line count before and after sending one message:</p>
 
 <pre><code>--print --resume                    original 15 -&gt; 23 lines, NO new file
 --print --resume --fork-session     original stays 23, fork created at 25</code></pre>
@@ -284,7 +284,7 @@ thing every "attach to a running session" implementation gets wrong.</p>
 
 <ol><li><strong>Measure the content before building machinery for it.</strong> One recording in week one would have saved two weeks.</li><li><strong>The bug is one layer below where it looks.</strong> Garbled text was a storage bug, not rendering. Dead taps were a missing mode declaration, not touch handling.</li><li><strong>When you're building sync between two things, try branching instead.</strong> Every sync bug I deleted couldn't exist in the forked design.</li></ol>
 
-<p>The reflow effort was 3,220 insertions across 18 files, and I reverted all of it before shipping something much smaller that worked. Reverting was the right call even though it stung.</p>
+<p>The reflow effort was 3,220 insertions across 18 files, and I reverted all of it before shipping something much smaller that worked. Reverting was the right call even though it stung. Rotate the phone today and the columns stay columns; tap a button and it answers. The bytes didn't get smarter, the state just travels with them now.</p>
 
 <p>The input side is its own story: touch, the keyboard, and the hidden text field with five thousand ghost characters that makes backspace auto-repeat work. Next article.</p>
 
